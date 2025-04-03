@@ -3,64 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open Circuit</title>
+    <title>Interactive Sine Plot</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             background-color: #f4f4f4;
-            padding: 50px;
+            padding: 20px;
         }
-        nav a {
+        canvas {
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        .controls {
+            margin: 20px;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
             margin: 10px;
-            text-decoration: none;
-            color: blue;
-            font-size: 18px;
+            width: 100px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <h1> Open Circuit</h1>
-    <p> Interactive figure: </p>
-
+    <h1>Interactive Sine Plot</h1>
+    <p>Enter values for maximum x and a:</p>
+    
     <div class="controls">
-        <label for="parameter1">Parameter 1:</label>
-        <input type="number" id="parameter1" value="30">
+        <label for="maxX">Max X:</label>
+        <input type="number" id="maxX" value="7" step="0.1">
         
-        <label for="parameter2">Parameter 2:</label>
-        <input type="number" id="parameter2" value="50">
+        <label for="a">Coefficient a:</label>
+        <input type="number" id="a" value="0.1" step="0.1">
         
-        <button onclick="updateSimulation()">Run Simulation</button>
+        <button onclick="updatePlot()">Plot</button>
     </div>
     
-    <canvas id="simulationChart"></canvas>
+    <canvas id="sineChart"></canvas>
     
     <script>
-        function updateSimulation() {
-            let param1 = document.getElementById('parameter1').value;
-            let param2 = document.getElementById('parameter2').value;
-            let time = Array.from({length: 50}, (_, i) => i);
-            let data1 = time.map(t => Math.sin(t * 0.1) * param1);
-            let data2 = time.map(t => Math.cos(t * 0.1) * param2);
+        function updatePlot() {
+            let maxX = parseFloat(document.getElementById('maxX').value);
+            let a = parseFloat(document.getElementById('a').value);
+            let step = 0.1;
+            let xValues = Array.from({length: Math.ceil(maxX / step)}, (_, i) => i * step);
+            let yValues = xValues.map(x => Math.sin(a * x));
             
-            let ctx = document.getElementById('simulationChart').getContext('2d');
-            if (window.simulationChart) {
-                window.simulationChart.destroy();
+            let ctx = document.getElementById('sineChart').getContext('2d');
+            if (window.sineChart) {
+                window.sineChart.destroy();
             }
-            window.simulationChart = new Chart(ctx, {
+            window.sineChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: time,
+                    labels: xValues,
                     datasets: [{
-                        label: 'Dataset 1',
-                        data: data1,
+                        label: 'y = sin(ax)',
+                        data: yValues,
                         borderColor: 'blue',
-                        fill: false
-                    }, {
-                        label: 'Dataset 2',
-                        data: data2,
-                        borderColor: 'red',
                         fill: false
                     }]
                 },
@@ -70,13 +80,13 @@
                         x: {
                             title: {
                                 display: true,
-                                text: 'Time (ms)'
+                                text: 'x'
                             }
                         },
                         y: {
                             title: {
                                 display: true,
-                                text: 'Response'
+                                text: 'y = sin(ax)'
                             }
                         }
                     }
@@ -84,12 +94,7 @@
             });
         }
 
-        updateSimulation();
+        updatePlot();
     </script>
-
-    
-    <nav>
-        <a href="index.html">Back to Home</a>
-    </nav>
 </body>
 </html>
