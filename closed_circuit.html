@@ -3,64 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive MATLAB Plot</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <title>Open Circuit</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             background-color: #f4f4f4;
-            padding: 20px;
+            padding: 50px;
         }
-        canvas {
-            max-width: 600px;
-            margin: 20px auto;
-        }
-        input {
-            padding: 10px;
-            font-size: 16px;
+        nav a {
             margin: 10px;
-        }
-        button {
-            padding: 10px 15px;
-            font-size: 16px;
-            background-color: blue;
-            color: white;
-            border: none;
-            cursor: pointer;
+            text-decoration: none;
+            color: blue;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
-    <h1>Interactive MATLAB Plot</h1>
-    <p>Enter a value for W:</p>
-    <input type="number" id="W" value="30">
-    <button onclick="updatePlot()">Update Plot</button>
-    <canvas id="myChart"></canvas>
+    <h1> Open Circuit</h1>
+    <p> Interactive figure: </p>
 
+    <div class="controls">
+        <label for="parameter1">Parameter 1:</label>
+        <input type="number" id="parameter1" value="30">
+        
+        <label for="parameter2">Parameter 2:</label>
+        <input type="number" id="parameter2" value="50">
+        
+        <button onclick="updateSimulation()">Run Simulation</button>
+    </div>
+    
+    <canvas id="simulationChart"></canvas>
+    
     <script>
-        function updatePlot() {
-            let W = document.getElementById('W').value;
-            let t_f = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
-            let exp1_cf = [0.113, 0.315, 0.518, 0.580, 0.635, 0.632, 0.608, 0.720, 0.533, 0.552, 0.582].map(x => x * (W / 30));
-            let exp2_cf = [0.078, 0.420, 0.785, 0.745, 0.678, 0.718, 0.885, 0.960, 0.813, 0.855, 0.923].map(x => x * (W / 30));
+        function updateSimulation() {
+            let param1 = document.getElementById('parameter1').value;
+            let param2 = document.getElementById('parameter2').value;
+            let time = Array.from({length: 50}, (_, i) => i);
+            let data1 = time.map(t => Math.sin(t * 0.1) * param1);
+            let data2 = time.map(t => Math.cos(t * 0.1) * param2);
             
-            let ctx = document.getElementById('myChart').getContext('2d');
-            if (window.myChart) {
-                window.myChart.destroy();
+            let ctx = document.getElementById('simulationChart').getContext('2d');
+            if (window.simulationChart) {
+                window.simulationChart.destroy();
             }
-            window.myChart = new Chart(ctx, {
+            window.simulationChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: t_f,
+                    labels: time,
                     datasets: [{
-                        label: 'Exp1 c_f',
-                        data: exp1_cf,
+                        label: 'Dataset 1',
+                        data: data1,
                         borderColor: 'blue',
                         fill: false
                     }, {
-                        label: 'Exp2 c_f',
-                        data: exp2_cf,
+                        label: 'Dataset 2',
+                        data: data2,
                         borderColor: 'red',
                         fill: false
                     }]
@@ -71,13 +69,13 @@
                         x: {
                             title: {
                                 display: true,
-                                text: 'Time after creatine added (min)'
+                                text: 'Time (ms)'
                             }
                         },
                         y: {
                             title: {
                                 display: true,
-                                text: 'Concentration (mg/dL)'
+                                text: 'Response'
                             }
                         }
                     }
@@ -85,7 +83,12 @@
             });
         }
 
-        updatePlot();
+        updateSimulation();
     </script>
+
+    
+    <nav>
+        <a href="index.html">Back to Home</a>
+    </nav>
 </body>
 </html>
