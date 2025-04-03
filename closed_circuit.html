@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MATLAB Script Host</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        pre {
+            background-color: #333;
+            color: #fff;
+            padding: 15px;
+            text-align: left;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            border-radius: 5px;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: blue;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        a:hover {
+            background-color: darkblue;
+        }
+    </style>
+</head>
+<body>
+    <h1>MATLAB Script</h1>
+    <p>Below is the MATLAB script for data analysis and plotting:</p>
+    <pre>
+clear all;
+
+% Global parameters
+W = 30;
+Qm = 14;
+Qf = 6;
+C0 = 100 * 0.01; % mg/mL
+V0 = 500; % mL
+
+% Open circuit extracting data
+% Creatine data from Angelos:
+t_f = 0:5:50;
+t_m = [0, 30];
+
+% Concentrations in mg/dL
+exp1_leak = 1.8; % missing
+exp1_w = 39.3;
+exp1_cf = [0.113 0.315 0.518 0.580 0.635 0.632 0.608 0.720 0.533 0.552 0.582];
+exp1_cm = [6.658 5.383];
+
+exp2_leak = 1.44;
+exp2_w = 28;
+exp2_cf = [0.078 0.420 0.785 0.745 0.678 0.718 0.885 0.960 0.813 0.855 0.923];
+exp2_cm = [7.417 6.233];
+
+figure()
+plot(t_f, exp1_cf, 'b o')
+hold on
+plot(t_m, exp1_cm, 'b x')
+plot(t_f, exp2_cf, 'r o')
+plot(t_m, exp2_cm, 'r x')
+ylabel ('concentration, mg/dL')
+xlabel('time after creatine added, min')
+
+% Best fit calculations
+tfit = 20:5:50;
+exp1_p = polyfit(tfit, exp1_cf(5:end), 0);
+plot(t_f, ones(length(t_f), 1)*exp1_p, 'b')
+
+exp2_p = polyfit(tfit, exp2_cf(5:end), 0);
+plot(t_f, ones(length(t_f), 1)*exp2_p, 'r')
+legend('exp1, c_f', 'exp1, c_m', 'exp2 c_f', 'exp2 c_m', 'exp1 c_f bestfit', 'exp2 c_f bestfit', 'Location', 'West')
+
+exp1_r = exp1_p/exp1_cm(2);
+exp1_D = Qm/(1-exp1_r);
+exp2_r = exp2_p/exp2_cm(2);
+exp2_D = Qm/(1-exp2_r);
+    </pre>
+    <a href="matlab_script.m" download>Download Script</a>
+</body>
+</html>
