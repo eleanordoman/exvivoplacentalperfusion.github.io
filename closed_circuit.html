@@ -36,65 +36,70 @@
     </style>
 </head>
 <body>
-    <h1>Interactive Sine Plot</h1>
-    <p>Enter values for maximum x and a:</p>
-    
-    <div class="controls">
-        <label for="maxX">Max X:</label>
-        <input type="number" id="maxX" value="7" step="0.1">
-        
-        <label for="a">Coefficient a:</label>
-        <input type="number" id="a" value="0.1" step="0.1">
-        
-        <button onclick="updatePlot()">Plot</button>
-    </div>
-    
-    <canvas id="sineChart"></canvas>
-    
-    <script>
-        function updatePlot() {
-            let maxX = parseFloat(document.getElementById('maxX').value);
-            let a = parseFloat(document.getElementById('a').value);
-            let step = 0.1;
-            let xValues = Array.from({length: Math.ceil(maxX / step)}, (_, i) => i * step);
-            let yValues = xValues.map(x => Math.sin(a * x));
-            
-            let ctx = document.getElementById('sineChart').getContext('2d');
-            if (window.sineChart) {
-                window.sineChart.destroy();
-            }
-            window.sineChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: xValues,
-                    datasets: [{
-                        label: 'y = sin(ax)',
-                        data: yValues,
-                        borderColor: 'blue',
-                        fill: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'x'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'y = sin(ax)'
-                            }
-                        }
-                    }
-                }
-            });
-        }
+  <h1>Plot Points</h1>
 
-        updatePlot();
-    </script>
+  <label for="xInput">X values (comma-separated):</label>
+  <input type="text" id="xInput" placeholder="e.g. 1,3,5,7">
+  <br><br>
+  <label for="yInput">Y values (comma-separated):</label>
+  <input type="text" id="yInput" placeholder="e.g. 2,4,5,10">
+  <br><br>
+  <button onclick="plotPoints()">Plot</button>
+
+  <canvas id="plotCanvas" width="500" height="500"></canvas>
+
+  <script>
+    const canvas = document.getElementById('plotCanvas');
+    const ctx = canvas.getContext('2d');
+    const padding = 40;
+
+    function plotPoints() {
+      const xValues = document.getElementById('xInput').value.split(',').map(Number);
+      const yValues = document.getElementById('yInput').value.split(',').map(Number);
+
+      if (xValues.length !== yValues.length) {
+        alert('X and Y must have the same number of values.');
+        return;
+      }
+
+      const points = xValues.map((val, idx) => ({ x: val, y: yValues[idx] }));
+      const maxX = Math.max(...xValues);
+      const maxY = Math.max(...yValues);
+
+      const scaleX = (canvas.width - padding * 2) / maxX;
+      const scaleY = (canvas.height - padding * 2) / maxY;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawAxes(maxX, maxY);
+
+      ctx.strokeStyle = 'red';
+      for (const point of points) {
+        const cx = padding + point.x * scaleX;
+        const cy = canvas.height - padding - point.y * scaleY;
+
+        ctx.beginPath();
+        ctx.moveTo(cx - 5, cy - 5);
+        ctx.lineTo(cx + 5, cy + 5);
+        ctx.moveTo(cx + 5, cy - 5);
+        ctx.lineTo(cx - 5, cy + 5);
+        ctx.stroke();
+      }
+    }
+
+    function drawAxes(maxX, maxY) {
+      ctx.beginPath();
+      ctx.moveTo(padding, canvas.height - padding);
+      ctx.lineTo(canvas.width - padding, canvas.height - padding);
+      ctx.moveTo(padding, canvas.height - padding);
+      ctx.lineTo(padding, padding);
+      ctx.strokeStyle = 'gray';
+      ctx.stroke();
+
+      // Labels
+      ctx.font = '12px Arial';
+      ctx.fillText('X-axis', canvas.width - padding, canvas.height - padding + 15);
+      ctx.fillText('Y-axis', padding - 30, padding);
+    }
+  </script>
 </body>
 </html>
