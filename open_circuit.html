@@ -9,41 +9,60 @@
     <h1>Open Curcuit </h1>
 
   <div class="inputs">
-    <label>Fetal timepoints:</label>
-    <input id="fetal_timepoints" value="0,5,10,15,20,25,30,35,40,45,50">
+    <div class="input-group">
+      <label>Fetal timepoints:</label>
+      <input id="fetal_timepoints" value="0,5,10,15,20,25,30,35,40,45,50">
+    </div>
 
-    <label>Maternal timepoints:</label>
-    <input id="maternal_timepoints" value="0,10,20,30,35">
+    <div class="input-group">
+      <label>Maternal timepoints:</label>
+      <input id="maternal_timepoints" value="0,10,20,30,35">
+    </div>
 
-    <label>cf (fetal conc.):</label>
-    <input id="cf" value="0.1,0.3,0.5,0.6,0.6,0.6,0.6,0.6,0.5,0.6,0.6">
+    <div class="input-group">
+      <label>cf (fetal conc.):</label>
+      <input id="cf" value="0.1,0.3,0.5,0.6,0.6,0.6,0.6,0.6,0.5,0.6,0.6">
+    </div>
 
-    <label>cm (maternal conc.):</label>
-    <input id="cm" value="7,6,5,5,5">
+    <div class="input-group">
+      <label>cm (maternal conc.):</label>
+      <input id="cm" value="7,6,5,5,5">
+    </div>
 
-    <label>Leakage (ml/min):</label>
-    <input id="leakage" value="1.4">
+    <div class="input-group">
+      <label>Leakage (ml/min):</label>
+      <input id="leakage" value="1.4">
+    </div>
 
-    <label>Qm (ml/min):</label>
-    <input id="Qm" value="14">
+    <div class="input-group">
+      <label>Qm (ml/min):</label>
+      <input id="Qm" value="14">
+    </div>
 
-    <label>Qf (ml/min):</label>
-    <input id="Qf" value="6">
+    <div class="input-group">
+      <label>Qf (ml/min):</label>
+      <input id="Qf" value="6">
+    </div>
 
-    <label>Tolerance (0-1):</label>
-    <input id="tol" value="0.5">
+    <div class="input-group">
+      <label>Tolerance (0-1):</label>
+      <input id="tol" value="0.5">
+    </div>
 
-    <label>Model parameter:</label>
-    <select id="model">
-      <option value="concentration_ratio">concentration ratio</option>
-      <option value="fetal_concentration">fetal concentration</option>
-      <option value="maternal_concentration">maternal concentration</option>
-    </select>
+    <div class="input-group">
+      <label for="parameterSelect">Select Parameter to Use:</label>
+      <select id="parameterSelect">
+        <option value="concentration_ratio">Concentration Ratio</option>
+        <option value="fetal_concentration">Fetal Concentration</option>
+        <option value="maternal_concentration">Maternal Concentration</option>
+      </select>
+    </div>
   </div>
+    
   <br>
   <button onclick="simulate()">Run Simulation</button>
 
-  <canvas id="plotCanvas" width="1000" height="400"></canvas>
+  <canvas id="plotCanvas" width="1000" height="600"></canvas>
 
   <script>
     const canvas = document.getElementById('plotCanvas');
@@ -136,9 +155,11 @@
       const scaleX = width / (maxX - minX);
       const scaleY = height / maxY;
 
+      // Title
       ctx.font = '14px Arial';
       ctx.fillText(title, offsetX + width / 2 - 40, 20);
 
+      // Axis
       ctx.strokeStyle = 'gray';
       ctx.beginPath();
       ctx.moveTo(offsetX + 0, canvas.height - padding);
@@ -147,12 +168,14 @@
       ctx.lineTo(offsetX + 0, padding);
       ctx.stroke();
 
+      // Model line
       ctx.strokeStyle = 'black';
       ctx.beginPath();
       ctx.moveTo(offsetX, canvas.height - padding - modelVal * scaleY);
       ctx.lineTo(offsetX + width, canvas.height - padding - modelVal * scaleY);
       ctx.stroke();
 
+      // Data points
       ctx.strokeStyle = 'red';
       for (let i = 0; i < time.length; i++) {
         const x = offsetX + (time[i] - minX) * scaleX;
@@ -160,9 +183,7 @@
         ctx.beginPath();
         ctx.moveTo(x - 5, y - 5);
         ctx.lineTo(x + 5, y + 5);
-        ctx.moveTo(x + 5, y - 5);
-        ctx.lineTo(x - 5, y + 5);
-        ctx.stroke();
+        ctx.moveTo(x + 5
       }
     }
   </script>
