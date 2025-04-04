@@ -7,7 +7,166 @@
 </head>
 <body>
     <h1>Open Curcuit </h1>
-    <p>Modelling coming</p>
+
+  <div class="inputs">
+    <label>Fetal timepoints:</label>
+    <input id="fetal_timepoints" value="0,5,10,15,20,25,30,35,40,45,50">
+
+    <label>Maternal timepoints:</label>
+    <input id="maternal_timepoints" value="0,10,20,30,35">
+
+    <label>cf (fetal conc.):</label>
+    <input id="cf" value="0.1,0.3,0.5,0.6,0.6,0.6,0.6,0.6,0.5,0.6,0.6">
+
+    <label>cm (maternal conc.):</label>
+    <input id="cm" value="7,6,5,5,5">
+
+    <label>Leakage (ml/min):</label>
+    <input id="leakage" value="1.4">
+
+    <label>Qm (ml/min):</label>
+    <input id="Qm" value="14">
+
+    <label>Qf (ml/min):</label>
+    <input id="Qf" value="6">
+
+    <label>Tolerance (0-1):</label>
+    <input id="tol" value="0.5">
+
+    <label>Model parameter:</label>
+    <select id="model">
+      <option value="concentration_ratio">concentration ratio</option>
+      <option value="fetal_concentration">fetal concentration</option>
+      <option value="maternal_concentration">maternal concentration</option>
+    </select>
+  </div>
+  <br>
+  <button onclick="simulate()">Run Simulation</button>
+
+  <canvas id="plotCanvas" width="1000" height="400"></canvas>
+
+  <script>
+    const canvas = document.getElementById('plotCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function simulate() {
+      const fetal_timepoints = getArray('fetal_timepoints');
+      const maternal_timepoints = getArray('maternal_timepoints');
+      const cf = getArray('cf');
+      const cm = getArray('cm');
+      const leakage = parseFloat(document.getElementById('leakage').value);
+      const Qm = parseFloat(document.getElementById('Qm').value);
+      const Qf = parseFloat(document.getElementById('Qf').value);
+      const tol = parseFloat(document.getElementById('tol').value);
+      const model = document.getElementById('model').value;
+
+      const C0 = cm[0];
+      const D = determine_D(model, Qm, Qf, leakage, C0, tol, fetal_timepoints, maternal_timepoints, cf, cm);
+      const max_time = Math.max(...fetal_timepoints, ...maternal_timepoints);
+
+      const cfstar = C0 * D * Qm / (D * (Qf + Qm) + Qf * (Qm + leakage));
+      const cmstar = C0 * (D + Qf) * Qm / (D * (Qf + Qm) + Qf * (Qm + leakage));
+      const rstar = D / (D + Qf);
+
+      const shared = fetal_timepoints.filter(t => maternal_timepoints.includes(t));
+      const fetalInd = shared.map(t => fetal_timepoints.indexOf(t));
+      const maternalInd = shared.map(t => maternal_timepoints.indexOf(t));
+      const ratioData = fetalInd.map((fi, i) => cf[fi] / cm[maternalInd[i]]);
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const sectionWidth = canvas.width / 3;
+      plotSeries('Fetal Conc.', fetal_timepoints, cf, cfstar, 0, max_time, sectionWidth, 0);
+      plotSeries('Maternal Conc.', maternal_timepoints, cm, cmstar, 0, max_time, sectionWidth, sectionWidth);
+      plotSeries('Ratio', shared, ratioData, rstar, 0, max_time, sectionWidth, sectionWidth * 2);
+    }
+
+    function getArray(id) {
+      return document.getElementById(id).value.split(',').map(Number);
+    }
+
+    function determine_D(model, Qm, Qf, leakage, C0, tol, ft, mt, cf, cm) {
+      const maxT = Math.max(...ft, ...mt);
+      const minT = tol * maxT;
+
+      if (model === 'concentration_ratio') {
+        const shared = ft.filter(t => mt.includes(t));
+        const relevant = shared.filter(t => t >= minT);
+        if (relevant.length < 3) {
+          alert('Not enough shared timepoints at steady-state');
+          return 1;
+        }
+        const fetalInd = relevant.map(t => ft.indexOf(t));
+        const maternalInd = relevant.map(t => mt.indexOf(t));
+        const ratios = fetalInd.map((fi, i) => cf[fi] / cm[maternalInd[i]]);
+        const avg = ratios.reduce((a, b) => a + b, 0) / ratios.length;
+        return Qf * avg / (1 - avg);
+
+      } else if (model === 'fetal_concentration') {
+        const relevant = ft.filter(t => t >= minT);
+        if (relevant.length < 3) {
+          alert('Not enough fetal timepoints at steady-state');
+          return 1;
+        }
+        const indices = relevant.map(t => ft.indexOf(t));
+        const data = indices.map(i => cf[i]);
+        const avg = data.reduce((a, b) => a + b, 0) / data.length;
+        return avg * Qf * (Qm + leakage) / (C0 * Qm - avg * Qf * Qm);
+
+      } else if (model === 'maternal_concentration') {
+        const relevant = mt.filter(t => t >= minT);
+        if (relevant.length < 3) {
+          alert('Not enough maternal timepoints at steady-state');
+          return 1;
+        }
+        const indices = relevant.map(t => mt.indexOf(t));
+        const data = indices.map(i => cm[i]);
+        const avg = data.reduce((a, b) => a + b, 0) / data.length;
+        return (C0 * Qf * Qm - avg * Qf * (Qm + leakage)) / (avg * (Qf + Qm) - C0 * Qm);
+
+      } else {
+        alert('Invalid model selected');
+        return 1;
+      }
+    }
+
+    function plotSeries(title, time, data, modelVal, minX, maxX, width, offsetX) {
+      const padding = 30;
+      const height = canvas.height - 2 * padding;
+      const maxY = Math.max(...data, modelVal);
+      const scaleX = width / (maxX - minX);
+      const scaleY = height / maxY;
+
+      ctx.font = '14px Arial';
+      ctx.fillText(title, offsetX + width / 2 - 40, 20);
+
+      ctx.strokeStyle = 'gray';
+      ctx.beginPath();
+      ctx.moveTo(offsetX + 0, canvas.height - padding);
+      ctx.lineTo(offsetX + width, canvas.height - padding);
+      ctx.moveTo(offsetX + 0, canvas.height - padding);
+      ctx.lineTo(offsetX + 0, padding);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'black';
+      ctx.beginPath();
+      ctx.moveTo(offsetX, canvas.height - padding - modelVal * scaleY);
+      ctx.lineTo(offsetX + width, canvas.height - padding - modelVal * scaleY);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'red';
+      for (let i = 0; i < time.length; i++) {
+        const x = offsetX + (time[i] - minX) * scaleX;
+        const y = canvas.height - padding - data[i] * scaleY;
+        ctx.beginPath();
+        ctx.moveTo(x - 5, y - 5);
+        ctx.lineTo(x + 5, y + 5);
+        ctx.moveTo(x + 5, y - 5);
+        ctx.lineTo(x - 5, y + 5);
+        ctx.stroke();
+      }
+    }
+  </script>
+
     <a href="index.html">Back to Home</a>
 </body>
 </html>
