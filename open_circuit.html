@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Open Circuit - Chart.js</title>
@@ -35,7 +36,8 @@
             margin-bottom: 5px;
         }
 
-        input, select {
+        input,
+        select {
             padding: 6px;
             font-size: 14px;
             border-radius: 4px;
@@ -82,6 +84,7 @@
         }
     </style>
 </head>
+
 <body>
     <h1>Open Circuit</h1>
 
@@ -159,7 +162,9 @@
             const model = document.getElementById('parameterSelect').value;
             const C0 = cm[0];
 
-            const D = determine_D(model, Qm, Qf, leakage, C0, tol, ft, mt, cf, cm);
+            const result = determine_D(model, Qm, Qf, leakage, C0, tol, fetal_timepoints, maternal_timepoints, cf, cm);
+            const D = result.D;
+            const r2 = result.r2;
 
             const cfstar = C0 * D * Qm / (D * (Qf + Qm) + Qf * (Qm + leakage));
             const cmstar = C0 * (D + Qf) * Qm / (D * (Qf + Qm) + Qf * (Qm + leakage));
@@ -181,43 +186,85 @@
             const maxT = Math.max(...ft, ...mt);
             const minT = tol * maxT;
 
-            if (model === 'concentration_ratio') {
-                const shared = ft.filter(t => mt.includes(t)).filter(t => t >= minT);
-                if (shared.length < 3) {
-                    alert('Not enough shared timepoints at steady-state');
-                    return 1;
-                }
-                const fi = shared.map(t => ft.indexOf(t));
-                const mi = shared.map(t => mt.indexOf(t));
-                const ratios = fi.map((f, i) => cf[f] / cm[mi[i]]);
-                return Qf * (ratios.reduce((a, b) => a + b, 0) / ratios.length) / (1 - (ratios.reduce((a, b) => a + b, 0) / ratios.length));
+            function rSquared(yActual, yPredicted) {
+                const mean = yActual.reduce((sum, val) => sum + val, 0) / yActual.length;
+                const ssTot = yActual.reduce((sum, val) => sum + (val - mean) ** 2, 0);
+                const ssRes = yActual.reduce((sum, val, i) => sum + (val - yPredicted[i]) ** 2, 0);
+                return 1 - (ssRes / ssTot);
             }
 
-            if (model === 'fetal_concentration') {
+            function constantFit(yVals) {
+                // Zero-degree polynomial = best constant fit
+                return yVals.reduce((sum, val) => sum + val, 0) / yVals.length;
+            }
+
+            if (model === 'concentration_ratio') {
+                const shared = ft.filter(t => mt.includes(t));
+                const relevant = shared.filter(t => t >= minT);
+                if (relevant.length < 3) {
+                    alert('Not enough shared timepoints at steady-state');
+                    return 1; % problem ?
+                }
+                const fetalInd = relevant.map(t => ft.indexOf(t));
+                const maternalInd = relevant.map(t => mt.indexOf(t));
+                const ratios = fetalInd.map((fi, i) => cf[fi] / cm[maternalInd[i]]);
+                const fittedRatio = constantFit(ratios);
+                const yPred = Array(values.length).fill(fitted);
+                const r2 = rSquared(values, yPred);
+                console.log(`R² (ratios): ${r2.toFixed(3)}`);
+
+                const D = Qf * fittedRatio / (1 - fittedRatio);
+                return {
+                    D,
+                    r2
+                };
+
+
+            } else if (model === 'fetal_concentration') {
                 const relevant = ft.filter(t => t >= minT);
                 if (relevant.length < 3) {
                     alert('Not enough fetal timepoints at steady-state');
                     return 1;
                 }
                 const indices = relevant.map(t => ft.indexOf(t));
-                const avg = indices.map(i => cf[i]).reduce((a, b) => a + b) / indices.length;
-                return avg * Qf * (Qm + leakage) / (C0 * Qm - avg * Qf * Qm);
-            }
+                const values = indices.map(i => cf[i]);
 
-            if (model === 'maternal_concentration') {
+                const fitted = constantFit(values);
+                const yPred = Array(values.length).fill(fitted);
+                const r2 = rSquared(values, yPred);
+                console.log(`R² (fetal): ${r2.toFixed(3)}`);
+
+                const D = fitted * Qf * (Qm + leakage) / (C0 * Qm - fitted * Qf * Qm);
+                return {
+                    D,
+                    r2
+                };
+
+            } else if (model === 'maternal_concentration') {
                 const relevant = mt.filter(t => t >= minT);
                 if (relevant.length < 3) {
                     alert('Not enough maternal timepoints at steady-state');
                     return 1;
                 }
                 const indices = relevant.map(t => mt.indexOf(t));
-                const avg = indices.map(i => cm[i]).reduce((a, b) => a + b) / indices.length;
-                return (C0 * Qf * Qm - avg * Qf * (Qm + leakage)) / (avg * (Qf + Qm) - C0 * Qm);
-            }
+                const values = indices.map(i => cm[i]);
+                const fitted = constantFit(values);
+                const yPred = Array(values.length).fill(fitted);
+                const r2 = rSquared(values, yPred);
+                console.log(`R² (maternal): ${r2.toFixed(3)}`);
 
-            alert('Invalid model selected');
-            return 1;
+                const D = (C0 * Qf * Qm - fitted * Qf * (Qm + leakage)) / (fitted * (Qf + Qm) - C0 * Qm);
+                return {
+                    D,
+                    r2
+                };
+
+            } else {
+                alert('Invalid model selected');
+                return 1;
+            }
         }
+
 
         function plotChart(canvasId, title, labels, data, modelVal) {
             const ctx = document.getElementById(canvasId).getContext('2d');
@@ -235,8 +282,7 @@
                 type: 'line',
                 data: {
                     labels: labels,
-                    datasets: [
-                        {
+                    datasets: [{
                             label: 'Data',
                             data: data,
                             borderColor: '#ff6384',
@@ -259,11 +305,15 @@
                         title: {
                             display: true,
                             text: title,
-                            font: { size: 16 }
+                            font: {
+                                size: 16
+                            }
                         }
                     },
                     scales: {
-                        y: { beginAtZero: true }
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
             });
@@ -274,4 +324,5 @@
         }
     </script>
 </body>
+
 </html>
