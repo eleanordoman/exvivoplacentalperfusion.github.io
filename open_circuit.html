@@ -2,327 +2,308 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Open Circuit - Chart.js</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-            background-color: #f9f9f9;
-        }
+  <meta charset="UTF-8">
+  <title>Open Circuit - Chart.js</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background-color: #f9f9f9;
+    }
 
-        h1 {
-            text-align: center;
-            color: #333;
-        }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
 
-        .inputs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
+    .inputs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            min-width: 200px;
-        }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      min-width: 200px;
+    }
 
-        label {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
 
-        input,
-        select {
-            padding: 6px;
-            font-size: 14px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
+    input,
+    select {
+      padding: 6px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
 
-        button {
-            display: block;
-            margin: 0 auto 20px auto;
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+    button {
+      display: block;
+      margin: 0 auto 20px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
 
-        #d-value {
-            margin-top: 20px;
-            font-size: 18px;
-            font-weight: bold;
-            text-align: center;
-            color: #444;
-        }
+    #d-value {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      color: #444;
+    }
 
-        .charts {
-            display: flex;
-            gap: 40px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
+    .charts {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
 
-        .chart-container {
-            width: 300px;
-        }
+    .chart-container {
+      width: 300px;
+    }
 
-        a {
-            display: block;
-            text-align: center;
-            margin-top: 30px;
-            text-decoration: none;
-            color: #007bff;
-        }
-    </style>
+    a {
+      display: block;
+      text-align: center;
+      margin-top: 30px;
+      text-decoration: none;
+      color: #007bff;
+    }
+  </style>
 </head>
 
 <body>
-    <h1>Open Circuit</h1>
+  <h1>Open Circuit</h1>
 
-    <div class="inputs">
-        <div class="input-group">
-            <label>Fetal timepoints:</label>
-            <input id="fetal_timepoints" value="0,5,10,15,20,25,30,35,40,45,50">
-        </div>
-        <div class="input-group">
-            <label>Maternal timepoints:</label>
-            <input id="maternal_timepoints" value="0,10,20,30,35">
-        </div>
-        <div class="input-group">
-            <label>cf (fetal conc.):</label>
-            <input id="cf" value="0.1,0.3,0.5,0.6,0.6,0.6,0.6,0.6,0.5,0.6,0.6">
-        </div>
-        <div class="input-group">
-            <label>cm (maternal conc.):</label>
-            <input id="cm" value="7,6,5,5,5">
-        </div>
-        <div class="input-group">
-            <label>Leakage (ml/min):</label>
-            <input id="leakage" value="1.4">
-        </div>
-        <div class="input-group">
-            <label>Qm (ml/min):</label>
-            <input id="Qm" value="14">
-        </div>
-        <div class="input-group">
-            <label>Qf (ml/min):</label>
-            <input id="Qf" value="6">
-        </div>
-        <div class="input-group">
-            <label>Tolerance (0-1):</label>
-            <input id="tol" value="0.5">
-        </div>
-        <div class="input-group">
-            <label>Select Parameter:</label>
-            <select id="parameterSelect">
-                <option value="concentration_ratio">Concentration Ratio</option>
-                <option value="fetal_concentration">Fetal Concentration</option>
-                <option value="maternal_concentration">Maternal Concentration</option>
-            </select>
-        </div>
+  <div class="inputs">
+    <div class="input-group">
+      <label>Fetal timepoints:</label>
+      <input id="fetal_timepoints" value="0,5,10,15,20,25,30,35,40,45,50">
     </div>
-
-    <button onclick="simulate()">Run Simulation</button>
-
-    <div id="d-value"></div>
-
-    <div class="charts">
-        <div class="chart-container"><canvas id="fetalChart"></canvas></div>
-        <div class="chart-container"><canvas id="maternalChart"></canvas></div>
-        <div class="chart-container"><canvas id="ratioChart"></canvas></div>
+    <div class="input-group">
+      <label>Maternal timepoints:</label>
+      <input id="maternal_timepoints" value="0,10,20,30,35">
     </div>
+    <div class="input-group">
+      <label>cf (fetal conc.):</label>
+      <input id="cf" value="0.1,0.3,0.5,0.6,0.6,0.6,0.6,0.6,0.5,0.6,0.6">
+    </div>
+    <div class="input-group">
+      <label>cm (maternal conc.):</label>
+      <input id="cm" value="7,6,5,5,5">
+    </div>
+    <div class="input-group">
+      <label>Leakage (ml/min):</label>
+      <input id="leakage" value="1.4">
+    </div>
+    <div class="input-group">
+      <label>Qm (ml/min):</label>
+      <input id="Qm" value="14">
+    </div>
+    <div class="input-group">
+      <label>Qf (ml/min):</label>
+      <input id="Qf" value="6">
+    </div>
+    <div class="input-group">
+      <label>Tolerance (0-1):</label>
+      <input id="tol" value="0.5">
+    </div>
+    <div class="input-group">
+      <label>Select Parameter:</label>
+      <select id="parameterSelect">
+        <option value="concentration_ratio">Concentration Ratio</option>
+        <option value="fetal_concentration">Fetal Concentration</option>
+        <option value="maternal_concentration">Maternal Concentration</option>
+      </select>
+    </div>
+  </div>
 
-    <a href="index.html">Back to Home</a>
+  <button onclick="simulate()">Run Simulation</button>
 
-    <script>
-        let fetalChart, maternalChart, ratioChart;
+  <div id="d-value"></div>
 
-        function getArray(id) {
-            return document.getElementById(id).value.split(',').map(Number);
+  <div class="charts">
+    <div class="chart-container"><canvas id="fetalChart"></canvas></div>
+    <div class="chart-container"><canvas id="maternalChart"></canvas></div>
+    <div class="chart-container"><canvas id="ratioChart"></canvas></div>
+  </div>
+
+  <a href="index.html">Back to Home</a>
+
+  <script>
+    let fetalChart, maternalChart, ratioChart;
+
+    function getArray(id) {
+      return document.getElementById(id).value.split(',').map(Number);
+    }
+
+    function simulate() {
+      const ft = getArray('fetal_timepoints');
+      const mt = getArray('maternal_timepoints');
+      const cf = getArray('cf');
+      const cm = getArray('cm');
+      const leakage = parseFloat(document.getElementById('leakage').value);
+      const Qm = parseFloat(document.getElementById('Qm').value);
+      const Qf = parseFloat(document.getElementById('Qf').value);
+      const tol = parseFloat(document.getElementById('tol').value);
+      const model = document.getElementById('parameterSelect').value;
+      const C0 = cm[0];
+
+      const result = determine_D(model, Qm, Qf, leakage, C0, tol, ft, mt, cf, cm);
+      const D = result.D;
+      const r2 = result.r2;
+
+      const cfstar = C0 * D * Qm / (D * (Qf + Qm) + Qf * (Qm + leakage));
+      const cmstar = C0 * (D + Qf) * Qm / (D * (Qf + Qm) + Qf * (Qm + leakage));
+      const rstar = D / (D + Qf);
+
+      const shared = ft.filter(t => mt.includes(t));
+      const fetalInd = shared.map(t => ft.indexOf(t));
+      const maternalInd = shared.map(t => mt.indexOf(t));
+      const ratioData = fetalInd.map((fi, i) => cf[fi] / cm[maternalInd[i]]);
+
+      document.getElementById('d-value').innerText = `D = ${D.toFixed(2)} | R² = ${r2.toFixed(3)}`;
+
+      plotChart('fetalChart', 'Fetal Concentration', ft, cf, cfstar);
+      plotChart('maternalChart', 'Maternal Concentration', mt, cm, cmstar);
+      plotChart('ratioChart', 'Fetal/Maternal Ratio', shared, ratioData, rstar);
+    }
+
+    function determine_D(model, Qm, Qf, leakage, C0, tol, ft, mt, cf, cm) {
+      const maxT = Math.max(...ft, ...mt);
+      const minT = tol * maxT;
+
+      function rSquared(yActual, yPredicted) {
+        const mean = yActual.reduce((sum, val) => sum + val, 0) / yActual.length;
+        const ssTot = yActual.reduce((sum, val) => sum + (val - mean) ** 2, 0);
+        const ssRes = yActual.reduce((sum, val, i) => sum + (val - yPredicted[i]) ** 2, 0);
+        return 1 - (ssRes / ssTot);
+      }
+
+      function constantFit(yVals) {
+        return yVals.reduce((sum, val) => sum + val, 0) / yVals.length;
+      }
+
+      if (model === 'concentration_ratio') {
+        const shared = ft.filter(t => mt.includes(t));
+        const relevant = shared.filter(t => t >= minT);
+        if (relevant.length < 3) {
+          alert('Not enough shared timepoints at steady-state');
+          return { D: 1, r2: 0 };
         }
+        const fetalInd = relevant.map(t => ft.indexOf(t));
+        const maternalInd = relevant.map(t => mt.indexOf(t));
+        const ratios = fetalInd.map((fi, i) => cf[fi] / cm[maternalInd[i]]);
+        const fitted = constantFit(ratios);
+        const yPred = Array(ratios.length).fill(fitted);
+        const r2 = rSquared(ratios, yPred);
 
-        function simulate() {
-            const ft = getArray('fetal_timepoints');
-            const mt = getArray('maternal_timepoints');
-            const cf = getArray('cf');
-            const cm = getArray('cm');
-            const leakage = parseFloat(document.getElementById('leakage').value);
-            const Qm = parseFloat(document.getElementById('Qm').value);
-            const Qf = parseFloat(document.getElementById('Qf').value);
-            const tol = parseFloat(document.getElementById('tol').value);
-            const model = document.getElementById('parameterSelect').value;
-            const C0 = cm[0];
+        const D = Qf * fitted / (1 - fitted);
+        return { D, r2 };
+      }
 
-            const result = determine_D(model, Qm, Qf, leakage, C0, tol, fetal_timepoints, maternal_timepoints, cf, cm);
-            const D = result.D;
-            const r2 = result.r2;
-
-            const cfstar = C0 * D * Qm / (D * (Qf + Qm) + Qf * (Qm + leakage));
-            const cmstar = C0 * (D + Qf) * Qm / (D * (Qf + Qm) + Qf * (Qm + leakage));
-            const rstar = D / (D + Qf);
-
-            const shared = ft.filter(t => mt.includes(t));
-            const fetalInd = shared.map(t => ft.indexOf(t));
-            const maternalInd = shared.map(t => mt.indexOf(t));
-            const ratioData = fetalInd.map((fi, i) => cf[fi] / cm[maternalInd[i]]);
-
-            document.getElementById('d-value').innerText = `D = ${D.toFixed(2)}`;
-
-            plotChart('fetalChart', 'Fetal Concentration', ft, cf, cfstar);
-            plotChart('maternalChart', 'Maternal Concentration', mt, cm, cmstar);
-            plotChart('ratioChart', 'Fetal/Maternal Ratio', shared, ratioData, rstar);
+      if (model === 'fetal_concentration') {
+        const relevant = ft.filter(t => t >= minT);
+        if (relevant.length < 3) {
+          alert('Not enough fetal timepoints at steady-state');
+          return { D: 1, r2: 0 };
         }
+        const indices = relevant.map(t => ft.indexOf(t));
+        const values = indices.map(i => cf[i]);
+        const fitted = constantFit(values);
+        const yPred = Array(values.length).fill(fitted);
+        const r2 = rSquared(values, yPred);
 
-        function determine_D(model, Qm, Qf, leakage, C0, tol, ft, mt, cf, cm) {
-            const maxT = Math.max(...ft, ...mt);
-            const minT = tol * maxT;
+        const D = fitted * Qf * (Qm + leakage) / (C0 * Qm - fitted * Qf * Qm);
+        return { D, r2 };
+      }
 
-            function rSquared(yActual, yPredicted) {
-                const mean = yActual.reduce((sum, val) => sum + val, 0) / yActual.length;
-                const ssTot = yActual.reduce((sum, val) => sum + (val - mean) ** 2, 0);
-                const ssRes = yActual.reduce((sum, val, i) => sum + (val - yPredicted[i]) ** 2, 0);
-                return 1 - (ssRes / ssTot);
-            }
-
-            function constantFit(yVals) {
-                // Zero-degree polynomial = best constant fit
-                return yVals.reduce((sum, val) => sum + val, 0) / yVals.length;
-            }
-
-            if (model === 'concentration_ratio') {
-                const shared = ft.filter(t => mt.includes(t));
-                const relevant = shared.filter(t => t >= minT);
-                if (relevant.length < 3) {
-                    alert('Not enough shared timepoints at steady-state');
-                    return 1; % problem ?
-                }
-                const fetalInd = relevant.map(t => ft.indexOf(t));
-                const maternalInd = relevant.map(t => mt.indexOf(t));
-                const ratios = fetalInd.map((fi, i) => cf[fi] / cm[maternalInd[i]]);
-                const fittedRatio = constantFit(ratios);
-                const yPred = Array(values.length).fill(fitted);
-                const r2 = rSquared(values, yPred);
-                console.log(`R² (ratios): ${r2.toFixed(3)}`);
-
-                const D = Qf * fittedRatio / (1 - fittedRatio);
-                return {
-                    D,
-                    r2
-                };
-
-
-            } else if (model === 'fetal_concentration') {
-                const relevant = ft.filter(t => t >= minT);
-                if (relevant.length < 3) {
-                    alert('Not enough fetal timepoints at steady-state');
-                    return 1;
-                }
-                const indices = relevant.map(t => ft.indexOf(t));
-                const values = indices.map(i => cf[i]);
-
-                const fitted = constantFit(values);
-                const yPred = Array(values.length).fill(fitted);
-                const r2 = rSquared(values, yPred);
-                console.log(`R² (fetal): ${r2.toFixed(3)}`);
-
-                const D = fitted * Qf * (Qm + leakage) / (C0 * Qm - fitted * Qf * Qm);
-                return {
-                    D,
-                    r2
-                };
-
-            } else if (model === 'maternal_concentration') {
-                const relevant = mt.filter(t => t >= minT);
-                if (relevant.length < 3) {
-                    alert('Not enough maternal timepoints at steady-state');
-                    return 1;
-                }
-                const indices = relevant.map(t => mt.indexOf(t));
-                const values = indices.map(i => cm[i]);
-                const fitted = constantFit(values);
-                const yPred = Array(values.length).fill(fitted);
-                const r2 = rSquared(values, yPred);
-                console.log(`R² (maternal): ${r2.toFixed(3)}`);
-
-                const D = (C0 * Qf * Qm - fitted * Qf * (Qm + leakage)) / (fitted * (Qf + Qm) - C0 * Qm);
-                return {
-                    D,
-                    r2
-                };
-
-            } else {
-                alert('Invalid model selected');
-                return 1;
-            }
+      if (model === 'maternal_concentration') {
+        const relevant = mt.filter(t => t >= minT);
+        if (relevant.length < 3) {
+          alert('Not enough maternal timepoints at steady-state');
+          return { D: 1, r2: 0 };
         }
+        const indices = relevant.map(t => mt.indexOf(t));
+        const values = indices.map(i => cm[i]);
+        const fitted = constantFit(values);
+        const yPred = Array(values.length).fill(fitted);
+        const r2 = rSquared(values, yPred);
 
+        const D = (C0 * Qf * Qm - fitted * Qf * (Qm + leakage)) / (fitted * (Qf + Qm) - C0 * Qm);
+        return { D, r2 };
+      }
 
-        function plotChart(canvasId, title, labels, data, modelVal) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            const chartRef = {
-                fetalChart,
-                maternalChart,
-                ratioChart
-            };
+      alert('Invalid model selected');
+      return { D: 1, r2: 0 };
+    }
 
-            if (chartRef[canvasId]) {
-                chartRef[canvasId].destroy();
+    function plotChart(canvasId, title, labels, data, modelVal) {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+
+      if (canvasId === 'fetalChart' && fetalChart) fetalChart.destroy();
+      if (canvasId === 'maternalChart' && maternalChart) maternalChart.destroy();
+      if (canvasId === 'ratioChart' && ratioChart) ratioChart.destroy();
+
+      const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Data',
+              data: data,
+              borderColor: '#ff6384',
+              backgroundColor: 'rgba(255,99,132,0.2)',
+              fill: false,
+              tension: 0.3
+            },
+            {
+              label: 'Model',
+              data: Array(labels.length).fill(modelVal),
+              borderColor: '#333',
+              borderDash: [5, 5],
+              fill: false
             }
-
-            const chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                            label: 'Data',
-                            data: data,
-                            borderColor: '#ff6384',
-                            backgroundColor: 'rgba(255,99,132,0.2)',
-                            fill: false,
-                            tension: 0.3,
-                        },
-                        {
-                            label: 'Model',
-                            data: Array(labels.length).fill(modelVal),
-                            borderColor: '#333',
-                            borderDash: [5, 5],
-                            fill: false,
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: title,
-                            font: {
-                                size: 16
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-
-            if (canvasId === 'fetalChart') fetalChart = chart;
-            if (canvasId === 'maternalChart') maternalChart = chart;
-            if (canvasId === 'ratioChart') ratioChart = chart;
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: title,
+              font: {
+                size: 16
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
         }
-    </script>
+      });
+
+      if (canvasId === 'fetalChart') fetalChart = chart;
+      if (canvasId === 'maternalChart') maternalChart = chart;
+      if (canvasId === 'ratioChart') ratioChart = chart;
+    }
+  </script>
 </body>
 
 </html>
