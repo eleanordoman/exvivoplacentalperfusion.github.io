@@ -181,7 +181,7 @@
             const maternalInd = shared.map(t => mt.indexOf(t));
             const ratioData = fetalInd.map((fi, i) => cf[fi] / cm[maternalInd[i]]);
 
-            document.getElementById('d-value').innerText = `D = ${D.toFixed(2)}, rNorm = ${rnorm.toFixed(3)}`;
+            document.getElementById('d-value').innerText = `D = ${D.toFixed(4)}, rNorm = ${rnorm.toFixed(4)}`;
 
             plotChart('fetalChart', 'Fetal Concentration', ft, cf, cfstar);
             plotChart('maternalChart', 'Maternal Concentration', mt, cm, cmstar);
