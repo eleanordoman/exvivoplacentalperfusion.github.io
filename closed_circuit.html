@@ -1,105 +1,124 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Sine Plot</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
-        canvas {
-            max-width: 800px;
-            margin: 20px auto;
-        }
-        .controls {
-            margin: 20px;
-        }
-        input {
-            padding: 10px;
-            font-size: 16px;
-            margin: 10px;
-            width: 100px;
-        }
-        button {
-            padding: 10px 15px;
-            font-size: 16px;
-            background-color: blue;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-    </style>
+  <title>Reservoir Concentration Ratio</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-  <h1>Plot Points</h1>
-
-  <label for="xInput">X values (comma-separated):</label>
-  <input type="text" id="xInput" placeholder="e.g. 1,3,5,7">
-  <br><br>
-  <label for="yInput">Y values (comma-separated):</label>
-  <input type="text" id="yInput" placeholder="e.g. 2,4,5,10">
-  <br><br>
-  <button onclick="plotPoints()">Plot</button>
-
-  <canvas id="plotCanvas" width="500" height="500"></canvas>
+  <div id="plot" style="width:100%;height:500px;"></div>
 
   <script>
-    const canvas = document.getElementById('plotCanvas');
-    const ctx = canvas.getContext('2d');
-    const padding = 40;
+    // Parameters
+    const v_SFR = 5, v_SMR = 5, v_SFD = 5, v_SMD = 0;
+    const dQ = 1, Qm = 14, Qf = 6, W = 30, V0 = 500;
+    const C0 = 1;
+    const D0 = 1;
+    const tend = 300;
 
-    function plotPoints() {
-      const xValues = document.getElementById('xInput').value.split(',').map(Number);
-      const yValues = document.getElementById('yInput').value.split(',').map(Number);
+    // Experimental time and concentration data
+    const T_SFR = [0, 60, 120, 180, 240, 300];
+    const T_SMR = [0, 60, 120, 180, 240, 300];
+    const c_FR = [0, 0.2, 0.3, 0.3, 0.3, 0.4];
+    const c_MR = [1, 0.7, 0.5, 0.4, 0.4, 0.4];
 
-      if (xValues.length !== yValues.length) {
-        alert('X and Y must have the same number of values.');
-        return;
+    // Define simulation parameters
+    const Vm = W * 0.34;
+    const Vf = W * 0.074;
+    const tspan = [...new Set([...Array(tend/5 + 1).keys()].map(i => i * 5).concat(T_SMR))].sort((a, b) => a - b);
+
+    // Initial condition [cm, cf, cM, cF]
+    const y0 = [0, 0, C0, 0];
+
+    // Runge-Kutta 4th order ODE solver
+    function rk4(f, y0, tspan) {
+      const dt = 1;
+      let y = y0.slice();
+      let Y = [y.slice()];
+      let T = [tspan[0]];
+
+      for (let i = 1; i < tspan.length; i++) {
+        const t = tspan[i - 1];
+        const tNext = tspan[i];
+        while (T[T.length - 1] < tNext) {
+          const h = Math.min(dt, tNext - T[T.length - 1]);
+          const k1 = f(T[T.length - 1], y);
+          const k2 = f(T[T.length - 1] + h/2, y.map((yi, j) => yi + h/2 * k1[j]));
+          const k3 = f(T[T.length - 1] + h/2, y.map((yi, j) => yi + h/2 * k2[j]));
+          const k4 = f(T[T.length - 1] + h, y.map((yi, j) => yi + h * k3[j]));
+          y = y.map((yi, j) => yi + h/6 * (k1[j] + 2*k2[j] + 2*k3[j] + k4[j]));
+          Y.push(y.slice());
+          T.push(T[T.length - 1] + h);
+        }
       }
 
-      const points = xValues.map((val, idx) => ({ x: val, y: yValues[idx] }));
-      const maxX = Math.max(...xValues);
-      const maxY = Math.max(...yValues);
+      return { t: T, y: Y };
+    }
 
-      const scaleX = (canvas.width - padding * 2) / maxX;
-      const scaleY = (canvas.height - padding * 2) / maxY;
+    function sampleVolume(t, timesR, timesD, vD, vR) {
+      const nD = timesD.filter(td => td <= t).length;
+      const nR = timesR.filter(tr => tr <= t).length;
+      return vD * nD + vR * nR;
+    }
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawAxes(maxX, maxY);
+    function Volume_RM(t) {
+      return -t * dQ + V0 - sampleVolume(t, T_SMR, [], 0, v_SMR);
+    }
 
-      ctx.strokeStyle = 'red';
-      for (const point of points) {
-        const cx = padding + point.x * scaleX;
-        const cy = canvas.height - padding - point.y * scaleY;
+    function Volume_RF(t) {
+      return t * dQ + V0 - sampleVolume(t, T_SFR, [], 0, v_SFR);
+    }
 
-        ctx.beginPath();
-        ctx.moveTo(cx - 5, cy - 5);
-        ctx.lineTo(cx + 5, cy + 5);
-        ctx.moveTo(cx + 5, cy - 5);
-        ctx.lineTo(cx - 5, cy + 5);
-        ctx.stroke();
+    // ODE system
+    function odefcn(t, y) {
+      const [cm, cf, cM, cF] = y;
+      const Qrm = Qm + dQ;
+      const Qrf = Qf - dQ;
+      const VRM = Volume_RM(t);
+      const VRF = Volume_RF(t);
+      const Dt = D0;
+
+      return [
+        (Qm * cM - Qrm * cm - Dt * (cm - cf) + dQ * cf) / Vm,
+        (Qf * (cF - cf) + Dt * (cm - cf)) / Vf,
+        Qrm * (cm - cM) / VRM,
+        Qrf * (cf - cF) / VRF
+      ];
+    }
+
+    // Solve ODEs
+    const result = rk4(odefcn, y0, tspan);
+    const t = result.t;
+    const cm = result.y.map(row => row[0]);
+    const cf = result.y.map(row => row[1]);
+    const cM = result.y.map(row => row[2]);
+    const cF = result.y.map(row => row[3]);
+    const cF_cM = cF.map((cfv, i) => cfv / cM[i]);
+
+    // Experimental ratios
+    const timeIntersect = T_SFR.filter(value => T_SMR.includes(value));
+    const cF_plot = timeIntersect.map(t => c_FR[T_SFR.indexOf(t)]);
+    const cM_plot = timeIntersect.map(t => c_MR[T_SMR.indexOf(t)]);
+    const cF_div_cM_exp = cF_plot.map((v, i) => v / cM_plot[i]);
+
+    // Plotting
+    Plotly.newPlot('plot', [
+      {
+        x: t,
+        y: cF_cM,
+        mode: 'lines',
+        name: 'Model prediction'
+      },
+      {
+        x: timeIntersect,
+        y: cF_div_cM_exp,
+        mode: 'markers',
+        name: 'Experimental points'
       }
-    }
-
-    function drawAxes(maxX, maxY) {
-      ctx.beginPath();
-      ctx.moveTo(padding, canvas.height - padding);
-      ctx.lineTo(canvas.width - padding, canvas.height - padding);
-      ctx.moveTo(padding, canvas.height - padding);
-      ctx.lineTo(padding, padding);
-      ctx.strokeStyle = 'gray';
-      ctx.stroke();
-
-      // Labels
-      ctx.font = '12px Arial';
-      ctx.fillText('X-axis', canvas.width - padding, canvas.height - padding + 15);
-      ctx.fillText('Y-axis', padding - 30, padding);
-    }
+    ], {
+      title: 'Reservoir concentration ratio',
+      xaxis: { title: 'time, min', range: [0, tend] },
+      yaxis: { title: 'cF / cM', range: [0, Math.ceil(Math.max(...cF_cM.concat(cF_div_cM_exp)) * 10) / 10] }
+    });
   </script>
 </body>
 </html>
