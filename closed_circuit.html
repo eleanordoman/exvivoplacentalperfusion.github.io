@@ -1,124 +1,336 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <title>Reservoir Concentration Ratio</title>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-</head>
-<body>
-  <div id="plot" style="width:100%;height:500px;"></div>
-
-  <script>
-    // Parameters
-    const v_SFR = 5, v_SMR = 5, v_SFD = 5, v_SMD = 0;
-    const dQ = 1, Qm = 14, Qf = 6, W = 30, V0 = 500;
-    const C0 = 1;
-    const D0 = 1;
-    const tend = 300;
-
-    // Experimental time and concentration data
-    const T_SFR = [0, 60, 120, 180, 240, 300];
-    const T_SMR = [0, 60, 120, 180, 240, 300];
-    const c_FR = [0, 0.2, 0.3, 0.3, 0.3, 0.4];
-    const c_MR = [1, 0.7, 0.5, 0.4, 0.4, 0.4];
-
-    // Define simulation parameters
-    const Vm = W * 0.34;
-    const Vf = W * 0.074;
-    const tspan = [...new Set([...Array(tend/5 + 1).keys()].map(i => i * 5).concat(T_SMR))].sort((a, b) => a - b);
-
-    // Initial condition [cm, cf, cM, cF]
-    const y0 = [0, 0, C0, 0];
-
-    // Runge-Kutta 4th order ODE solver
-    function rk4(f, y0, tspan) {
-      const dt = 1;
-      let y = y0.slice();
-      let Y = [y.slice()];
-      let T = [tspan[0]];
-
-      for (let i = 1; i < tspan.length; i++) {
-        const t = tspan[i - 1];
-        const tNext = tspan[i];
-        while (T[T.length - 1] < tNext) {
-          const h = Math.min(dt, tNext - T[T.length - 1]);
-          const k1 = f(T[T.length - 1], y);
-          const k2 = f(T[T.length - 1] + h/2, y.map((yi, j) => yi + h/2 * k1[j]));
-          const k3 = f(T[T.length - 1] + h/2, y.map((yi, j) => yi + h/2 * k2[j]));
-          const k4 = f(T[T.length - 1] + h, y.map((yi, j) => yi + h * k3[j]));
-          y = y.map((yi, j) => yi + h/6 * (k1[j] + 2*k2[j] + 2*k3[j] + k4[j]));
-          Y.push(y.slice());
-          T.push(T[T.length - 1] + h);
+    <meta charset="UTF-8">
+    <title>Open Circuit - Chart.js</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .form-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 2em;
+            flex-wrap: wrap;
+            max-width: 1000px;
+            margin-top: 1.5em;
         }
+
+        .column {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .inputs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: inline-block;
+            flex-direction: column;
+            min-width: 200px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .input-group label {
+            font-weight: 500;
+            margin-bottom: 0.3em;
+        }
+
+        .input-group input {
+            padding: 0.4em;
+        }
+
+        input,
+        select {
+            padding: 6px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            display: block;
+            margin: 0 auto 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        #d-value {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            color: #444;
+        }
+
+        .charts {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .chart-container {
+            width: 300px;
+        }
+
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            text-decoration: none;
+            color: #007bff;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Closed Circuit</h1>
+
+    <div style="margin-top: 1em; font-weight: bold;">Experimental parameters:</div>
+
+    <div class="inputs">
+        <div class="input-group">
+          <label for="Qf">Qf (mL/min):</label>
+          <input id="Qf" value="6">
+        </div>
+        <div class="input-group">
+          <label for="Qm">Qm (mL/min):</label>
+          <input id="Qm" value="14">
+        </div>
+        <div class="input-group">
+          <label for="dQ">leakage (mL/min):</label>
+          <input id="dQ" value="1">
+        </div>
+        <div class="input-group">
+          <label for="W">lobule weight (g):</label>
+          <input id="W" value="30">
+        </div>
+        <div class="input-group">
+          <label for="V0">Starting reservoir volume (mL):</label>
+          <input id="V0" value="500">
+        </div>
+      </div>
+
+    </div></div>
+        
+    <div style="margin-top: 1em; font-weight: bold;">Experimental data input:</div>
+
+    <div class="form-container">
+        <!-- Column 1 -->
+        <div class="column">
+          <div class="section-title">Sampling Volumes (mL):</div>
+          <div class="inputs">
+            <div class="input-group">
+                <label for="vsFR">v<sup>S</sup><sub>FR</sub>:</label>
+                <input id="vsFR" value="5">
+            </div>
+            <div class="input-group">
+                <label for="vsMR">v<sup>S</sup><sub>MR</sub>:</label>
+                <input id="vsMR" value="5">
+            </div>
+            <div class="input-group">
+                <label for="vsFD">v<sup>S</sup><sub>FD</sub>:</label>
+                <input id="vsFD" value="5">
+            </div>
+            <div class="input-group">
+                <label for="vsMD">v<sup>S</sup><sub>MD</sub>:</label>
+                <input id="vsMD" value="0">
+            </div>
+          </div>
+        </div>
+      
+        <!-- Column 2 -->
+        <div class="column">
+          <div class="section-title">Sampling timepoints (min):</div>
+          <div class="inputs">
+            <div class="input-group">
+              <label for="TsFR">T<sup>S</sup><sub>FR</sub>:</label>
+              <input id="TsFR" value="0, 60, 120, 180, 240, 300">
+            </div>
+            <div class="input-group">
+              <label for="TsMR">T<sup>S</sup><sub>MR</sub>:</label>
+              <input id="TsMR" value="0, 60, 120, 180, 240, 300">
+            </div>
+            <div class="input-group">
+              <label for="TsFD">T<sup>S</sup><sub>FD</sub>:</label>
+              <input id="TsFD" value="0, 60, 120, 180, 240, 300">
+            </div>
+            <div class="input-group">
+              <label for="TsMD">T<sup>S</sup><sub>MD</sub>:</label>
+              <input id="TsMD" value=" ">
+            </div>
+          </div>
+        </div>
+      
+        <!-- Column 3 -->
+        <div class="column">
+          <div class="section-title">Sample concentrations (mg/mL)</div>
+          <div class="inputs">
+            <div class="input-group">
+              <label for="cFR">c<sub>F</sub>:</label>
+              <input id="cFR" value="0;0.2;0.3;0.3;0.3;0.4">
+            </div>
+            <div class="input-group">
+              <label for="cMR">c <sub>M</sub>:</label>
+              <input id="cMR" value="1;0.7;0.5;0.4;0.4;0.4">
+            </div>
+            <div class="input-group">
+                <label for="cFD">c<sub>f</sub>:</label>
+              <input id="cFD" value="0;0.4;0.4;0.4;0.4;0.4">
+            </div>
+            <div class="input-group">
+              <label for="cMD">c <sub>m</sub>:</label>
+              <input id="cMD" value="">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <div style="margin-top: 1em; font-weight: bold;">Modelling parameters:</div>
+
+    <div class="inputs">
+        
+        <div class="input-group">
+            <label>Select Parameter:</label>
+            <select id="parameterSelect">
+                <option value="Rconcentration_ratio">Reservoir concentration ratio</option>
+                <option value="mat_concentration">Maternal reservoir concentration</option>
+                <option value="fet_concentration">Fetal reservoir concentration</option>
+                <option value="Dconcentration_ratio">Fetal drip and maternal reservoir concentration ratio</option>
+            </select>
+            <div class="input-group">
+                <label for="C0">C <sub>0</sub> (mg/mL):</label>
+                <input id="C0" value="1">
+            </div>
+            <div class="input-group">
+              <label for="D0">D <sub>0</sub>:</label>
+              <input id="D0" value="1">
+            </div>
+        </div>
+    </div>
+
+    <button onclick="simulate()">Run Simulation</button>
+
+    <div id="plot" style="width:100%;height:500px;"></div>
+       
+</body>
+
+<script type="module">
+    import LM from "https://esm.sh/ml-levenberg-marquardt";
+
+    function dydt(t, y, Dt) {
+        const Qrm = Qm + dQ, Qrf = Qf - dQ;
+
+        const VRM = V0 - dQ * t - sampleVolume(t, T_SMR, T_SMD, v_SMR, v_SMD);
+        const VRF = V0 + dQ * t - sampleVolume(t, T_SFR, T_SFD, v_SFR, v_SFD);
+
+        const [cm, cf, cM, cF] = y;
+
+        return [
+            (Qm*cM - Qrm*cm - Dt*(cm - cf) + dQ*cf) / Vm,
+            (Qf*(cF - cf) + Dt*(cm - cf)) / Vf,
+            Qrm*(cm - cM) / VRM,
+            Qrf*(cf - cF) / VRF
+        ];
+    }
+
+    function sampleVolume(t, T_SR, T_SD, v_SR, v_SD) {
+        const nR = T_SR.filter(time => time <= t).length;
+        const nD = T_SD.filter(time => time <= t).length;
+        return v_SR * nR + v_SD * nD;
+    }
+
+    function rk4(f, y0, t0, tEnd, dt, Dt) {
+      let t = t0, y = y0.slice(), T = [], Y = [];
+      while (t <= tEnd) {
+        T.push(t);
+        Y.push(y.slice());
+        let k1 = f(t, y, Dt);
+        let k2 = f(t + dt/2, y.map((yi, i) => yi + dt*k1[i]/2), Dt);
+        let k3 = f(t + dt/2, y.map((yi, i) => yi + dt*k2[i]/2), Dt);
+        let k4 = f(t + dt, y.map((yi, i) => yi + dt*k3[i]), Dt);
+        y = y.map((yi, i) => yi + dt / 6 * (k1[i] + 2*k2[i] + 2*k3[i] + k4[i]));
+        t += dt;
       }
-
-      return { t: T, y: Y };
+      return { T, Y };
     }
 
-    function sampleVolume(t, timesR, timesD, vD, vR) {
-      const nD = timesD.filter(td => td <= t).length;
-      const nR = timesR.filter(tr => tr <= t).length;
-      return vD * nD + vR * nR;
+    function modelGenerator(tspan, dt) {
+      return function([Dt]) {
+        const result = rk4(dydt, [0, 0, C0, 0], 0, Math.max(...tspan), dt, Dt);
+        const modelMap = new Map(result.T.map((t, i) => [Math.round(t), result.Y[i]]));
+        return tspan.map(t => {
+          const y = modelMap.get(Math.round(t));
+          return y ? y[3] / y[2] : 0;
+        });
+      };
     }
 
-    function Volume_RM(t) {
-      return -t * dQ + V0 - sampleVolume(t, T_SMR, [], 0, v_SMR);
-    }
+    // Fit using Levenberg-Marquardt
+    const options = {
+      damping: 1.5,
+      initialValues: [0.5], // Initial guess for Dt
+      gradientDifference: 1e-2,
+      maxIterations: 100,
+      errorTolerance: 1e-3,
+    };
 
-    function Volume_RF(t) {
-      return t * dQ + V0 - sampleVolume(t, T_SFR, [], 0, v_SFR);
-    }
+    const fit = LM({
+      x: T_data,
+      y: obs_ratios,
+      model: modelGenerator(T_data, 5),
+    }, options);
 
-    // ODE system
-    function odefcn(t, y) {
-      const [cm, cf, cM, cF] = y;
-      const Qrm = Qm + dQ;
-      const Qrf = Qf - dQ;
-      const VRM = Volume_RM(t);
-      const VRF = Volume_RF(t);
-      const Dt = D0;
+    console.log("Fitted Dt:", fit.parameterValues[0]);
 
-      return [
-        (Qm * cM - Qrm * cm - Dt * (cm - cf) + dQ * cf) / Vm,
-        (Qf * (cF - cf) + Dt * (cm - cf)) / Vf,
-        Qrm * (cm - cM) / VRM,
-        Qrf * (cf - cF) / VRF
-      ];
-    }
+    // Plot
+    const model_ratios = modelGenerator(T_data, 5)(fit.parameterValues);
 
-    // Solve ODEs
-    const result = rk4(odefcn, y0, tspan);
-    const t = result.t;
-    const cm = result.y.map(row => row[0]);
-    const cf = result.y.map(row => row[1]);
-    const cM = result.y.map(row => row[2]);
-    const cF = result.y.map(row => row[3]);
-    const cF_cM = cF.map((cfv, i) => cfv / cM[i]);
-
-    // Experimental ratios
-    const timeIntersect = T_SFR.filter(value => T_SMR.includes(value));
-    const cF_plot = timeIntersect.map(t => c_FR[T_SFR.indexOf(t)]);
-    const cM_plot = timeIntersect.map(t => c_MR[T_SMR.indexOf(t)]);
-    const cF_div_cM_exp = cF_plot.map((v, i) => v / cM_plot[i]);
-
-    // Plotting
     Plotly.newPlot('plot', [
       {
-        x: t,
-        y: cF_cM,
-        mode: 'lines',
-        name: 'Model prediction'
+        x: T_data,
+        y: obs_ratios,
+        mode: 'markers',
+        name: 'Observed cF/cM',
+        marker: { color: 'red', symbol: 'x' }
       },
       {
-        x: timeIntersect,
-        y: cF_div_cM_exp,
-        mode: 'markers',
-        name: 'Experimental points'
+        x: T_data,
+        y: model_ratios,
+        mode: 'lines+markers',
+        name: 'Fitted Model',
+        line: { color: 'black' }
       }
     ], {
-      title: 'Reservoir concentration ratio',
-      xaxis: { title: 'time, min', range: [0, tend] },
-      yaxis: { title: 'cF / cM', range: [0, Math.ceil(Math.max(...cF_cM.concat(cF_div_cM_exp)) * 10) / 10] }
+      title: 'Fitted Diffusivity Dt using Levenberg-Marquardt',
+      xaxis: { title: 'Time (min)' },
+      yaxis: { title: 'cF / cM' }
     });
-  </script>
-</body>
+</script>
+
 </html>
