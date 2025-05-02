@@ -259,6 +259,38 @@
         ];
     }
 
+    function simulate() {
+            const ft = getArray('fetal_timepoints');
+            const mt = getArray('maternal_timepoints');
+            const cf = getArray('cf');
+            const cm = getArray('cm');
+            const leakage = parseFloat(document.getElementById('leakage').value);
+            const Qm = parseFloat(document.getElementById('Qm').value);
+            const Qf = parseFloat(document.getElementById('Qf').value);
+            const tol = parseFloat(document.getElementById('tol').value);
+            const model = document.getElementById('parameterSelect').value;
+            const C0 = cm[0];
+
+            const result = determine_D(model, Qm, Qf, leakage, C0, tol, ft, mt, cf, cm);
+            const D = result.D;
+            const rnorm = result.rnorm;
+
+            const cfstar = C0 * D * Qm / (D * (Qf + Qm) + Qf * (Qm + leakage));
+            const cmstar = C0 * (D + Qf) * Qm / (D * (Qf + Qm) + Qf * (Qm + leakage));
+            const rstar = D / (D + Qf);
+
+            const shared = ft.filter(t => mt.includes(t));
+            const fetalInd = shared.map(t => ft.indexOf(t));
+            const maternalInd = shared.map(t => mt.indexOf(t));
+            const ratioData = fetalInd.map((fi, i) => cf[fi] / cm[maternalInd[i]]);
+
+            document.getElementById('d-value').innerText = `D = ${D.toFixed(4)}, rNorm = ${rnorm.toFixed(4)}`;
+
+            plotChart('fetalChart', 'Fetal Concentration', ft, cf, cfstar);
+            plotChart('maternalChart', 'Maternal Concentration', mt, cm, cmstar);
+            plotChart('ratioChart', 'Fetal/Maternal Ratio', shared, ratioData, rstar);
+        }
+
     function sampleVolume(t, T_SR, T_SD, v_SR, v_SD) {
         const nR = T_SR.filter(time => time <= t).length;
         const nD = T_SD.filter(time => time <= t).length;
