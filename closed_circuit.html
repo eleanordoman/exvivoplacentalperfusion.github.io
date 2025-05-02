@@ -260,29 +260,26 @@
     }
 
     function simulate() {
-            const ft = getArray('fetal_timepoints');
-            const mt = getArray('maternal_timepoints');
-            const cf = getArray('cf');
-            const cm = getArray('cm');
-            const leakage = parseFloat(document.getElementById('leakage').value);
-            const Qm = parseFloat(document.getElementById('Qm').value);
-            const Qf = parseFloat(document.getElementById('Qf').value);
-            const tol = parseFloat(document.getElementById('tol').value);
-            const model = document.getElementById('parameterSelect').value;
-            const C0 = cm[0];
-
-            const result = determine_D(model, Qm, Qf, leakage, C0, tol, ft, mt, cf, cm);
-            const D = result.D;
-            const rnorm = result.rnorm;
-
-            const cfstar = C0 * D * Qm / (D * (Qf + Qm) + Qf * (Qm + leakage));
-            const cmstar = C0 * (D + Qf) * Qm / (D * (Qf + Qm) + Qf * (Qm + leakage));
-            const rstar = D / (D + Qf);
-
-            const shared = ft.filter(t => mt.includes(t));
-            const fetalInd = shared.map(t => ft.indexOf(t));
-            const maternalInd = shared.map(t => mt.indexOf(t));
-            const ratioData = fetalInd.map((fi, i) => cf[fi] / cm[maternalInd[i]]);
+        const Qm = parseFloat(document.getElementById('Qm').value);
+        const Qf = parseFloat(document.getElementById('Qf').value);
+        const dQ = parseFloat(document.getElementById('dQ').value);
+        const W = parseFloat(document.getElementById('W').value);
+        const V0 = parseFloat(document.getElementById('V0').value);
+        const vsFR = parseFloat(document.getElementById('vsFR').value);
+        const vsFD = parseFloat(document.getElementById('vsFD').value);
+        const vsMR = parseFloat(document.getElementById('vsMR').value);
+        const vsMD = parseFloat(document.getElementById('vsMD').value);
+        const TsFR = getArray('TsFR');
+        const TsFD = getArray('TsFD');
+        const TsMR = getArray('TsMR');
+        const TsMD = getArray('TsMD');
+        const cFR = getArray('cFR');
+        const cFD = getArray('cFD');
+        const cMR = getArray('cMR');
+        const cMD = getArray('cMD');
+        const model = document.getElementById('parameterSelect').value;
+        const C0 = parseFloat(document.getElementById('C0').value);
+        const D0 = parseFloat(document.getElementById('D0').value);
 
             document.getElementById('d-value').innerText = `D = ${D.toFixed(4)}, rNorm = ${rnorm.toFixed(4)}`;
 
