@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Closed vs Open Model</title>
+  <script src="numeric.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.30.1.min.js"></script>
+  
+  <style>
+    input[type="range"] {
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    .input-group span {
+      display: block;
+      margin-top: 5px;
+      font-weight: bold;
+    }
+
+    .form-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 2em;
+        flex-wrap: wrap;
+        max-width: 1000px;
+        margin-top: 1.5em;
+    }
+
+    .column {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        margin: 30px;
+        background-color: #f9f9f9;
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+    }
+
+    .inputs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .input-group {
+        display: inline-block;
+        flex-direction: column;
+        min-width: 200px;
+    }
+
+    label {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .input-group label {
+        font-weight: 500;
+        margin-bottom: 0.3em;
+    }
+
+    .input-group input {
+        padding: 0.4em;
+    }
+
+    input,
+    select {
+        padding: 6px;
+        font-size: 14px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+    }
+
+    button {
+        display: block;
+        margin: 0 auto 20px auto;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .charts {
+        display: flex;
+        gap: 40px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .chart-container {
+        width: 300px;
+    }
+
+    a {
+        display: block;
+        text-align: center;
+        margin-top: 30px;
+        text-decoration: none;
+        color: #007bff;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .input-group label span {
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    .input-group {
+      margin-bottom: 1em;
+    }
+
+  </style>
+</head>
+
+<body>
+  <h1>Exploring leakage and transfer on open and closed concentrations</h1>
+
+  <div style="margin-top: 1em; font-weight: bold;">Experimental parameters:</div>
+  <div class="inputs">
+    <div class="input-group"><label for="Qf">Q<sub>f</sub> (mL/min):</label><input id="Qf" value="6"></div>
+    <div class="input-group"><label for="Qm">Q<sub>m</sub> (mL/min):</label><input id="Qm" value="14"></div>
+    <div class="input-group"><label for="W">lobule weight (g):</label><input id="W" value="30"></div>
+    <div class="input-group"><label for="V0">Starting reservoir volume (mL):</label><input id="V0" value="500"></div>
+    <div class="input-group"><label for="C0">Starting reservoir concentration (mg/mL):</label><input id="C0" value="1"></div>
+  </div>
+
+  <div style="margin-top: 1em; font-weight: bold;">Sampling regime:</div>
+  <div class="form-container">
+    <div class="column">
+      <div class="section-title">Sampling Volumes (mL):</div>
+      <div class="inputs">
+        <div class="input-group"><label for="vsFR">v<sup>S</sup><sub>FR</sub>:</label><input id="vsFR" value="5"></div>
+        <div class="input-group"><label for="vsMR">v<sup>S</sup><sub>MR</sub>:</label><input id="vsMR" value="5"></div>
+        <div class="input-group"><label for="vsFD">v<sup>S</sup><sub>FD</sub>:</label><input id="vsFD" value="5"></div>
+        <div class="input-group"><label for="vsMD">v<sup>S</sup><sub>MD</sub>:</label><input id="vsMD" value="0"></div>
+      </div>
+    </div>
+    <div class="column">
+      <div class="section-title">Sampling timepoints (min):</div>
+      <div class="inputs">
+        <div class="input-group"><label for="TsFR">T<sup>S</sup><sub>FR</sub>:</label><input id="TsFR" value="0, 60, 120, 180, 240, 300"></div>
+        <div class="input-group"><label for="TsMR">T<sup>S</sup><sub>MR</sub>:</label><input id="TsMR" value="0, 60, 120, 180, 240, 300"></div>
+        <div class="input-group"><label for="TsFD">T<sup>S</sup><sub>FD</sub>:</label><input id="TsFD" value="0, 60, 120, 180, 240, 300"></div>
+        <div class="input-group"><label for="TsMD">T<sup>S</sup><sub>MD</sub>:</label><input id="TsMD" value=""></div>
+      </div>
+    </div>
+  </div>
+
+<div style="margin-top: 2em; font-weight: bold;">Leakage & Transport Settings:</div>
+<div class="form-container">
+  <div class="input-group column">
+    <label for="dQ">Leakage (dQ), mL/min: <span id="dQ_val">1</span></label>
+    <input type="range" id="dQ" min="0" max="5" value="1" step=".1">
+  </div>
+  <div class="input-group column">
+    <label for="Dt">Transport parameter (Dt): <span id="Dt_val">10</span></label>
+    <input type="range" id="Dt" min="0" max="100" value="10" step="1">
+  </div>
+</div>
+
+<div id="warningBox" style="display:none; color: red; font-weight: bold; text-align: center; margin: 1em;"></div>
+
+
+  <div id="plot" style="width: 100%; height: 100vh;"></div>
+
+  <script>
+    function getArray(id) {
+      const val = document.getElementById(id).value.trim();
+      if (!val) return [];
+      return val
+      .split(',')
+      .map(s => parseFloat(s.trim()))
+      .filter(x => !isNaN(x));
+    }
+
+
+    function updateValue(id) {
+      document.getElementById(id + '_val').textContent = document.getElementById(id).value;
+      updatePlot();
+    }
+
+    function updatePlot() {
+      clearWarning(); // clear old warnings
+
+      const Qm = parseFloat(document.getElementById('Qm').value);
+      const Qf = parseFloat(document.getElementById('Qf').value);
+      const W = parseFloat(document.getElementById('W').value);
+      const V0 = parseFloat(document.getElementById('V0').value);
+      const C0 = parseFloat(document.getElementById('C0').value);
+      const vsFR = parseFloat(document.getElementById('vsFR').value);
+      const vsFD = parseFloat(document.getElementById('vsFD').value);
+      const vsMR = parseFloat(document.getElementById('vsMR').value);
+      const vsMD = parseFloat(document.getElementById('vsMD').value);
+      const TsFR = getArray('TsFR');
+      const TsFD = getArray('TsFD');
+      const TsMR = getArray('TsMR');
+      const TsMD = getArray('TsMD');
+
+      const dQ = parseFloat(document.getElementById('dQ').value);
+      const Dt = parseFloat(document.getElementById('Dt').value);
+
+      const tend = Math.max(...TsFR, ...TsMR, ...TsFD, ...(TsMD.length ? TsMD : [0]));
+      if (V0 < 2 * dQ * tend) {
+        console.warn("Warning: leakage flow (dQ) may exhaust volume before simulation ends.");
+      }
+
+      const totalSample = TsMR.length * vsMR + TsMD.length * vsMD + TsFR.length * vsFR + TsFD.length * vsFD;
+      if (totalSample > 2 * V0) {
+        console.warn("Warning: total sampling volume may exceed initial volume.");
+      }
+
+
+      const rstar = Dt / (Dt + Qf);
+      const cfstar = C0 * Dt * Qm / (Dt * (Qf + Qm) + Qf * (Qm + dQ));
+      const cmstar = C0 * (Dt + Qf) * Qm / (Dt * (Qf + Qm) + Qf * (Qm + dQ));
+    
+
+      
+      const Vm = W * 0.34;
+      const Vf = W * 0.074;
+      const tspan = Array.from(new Set([...Array(Math.floor(tend / 5) + 1).keys()].map(i => i * 5).concat(TsFR, TsMR, TsFD, TsMD))).sort((a, b) => a - b);
+      const y0 = [0, 0, C0, 0]; // cm, cf, cM, cF
+
+      function sampleVolume(t, T_SR, T_SD, v_SR, v_SD) {
+        const nR = T_SR.filter(time => time <= t).length;
+        const nD = T_SD.filter(time => time <= t).length;
+        return v_SR * nR + v_SD * nD;
+      }
+
+      function showWarning(message) {
+        const box = document.getElementById('warningBox');
+        box.textContent = message;
+        box.style.display = 'block';
+      }
+
+      function clearWarning() {
+        const box = document.getElementById('warningBox');
+        box.textContent = '';
+        box.style.display = 'none';
+      }
+
+      function safeVolume(vol, label, t) {
+        if (vol <= 0) {
+          const msg = `${label} volume became non-positive at t=${t.toFixed(2)}: ${vol.toFixed(4)} mL`;
+          console.warn(msg);
+          showWarning(msg);
+          return 1e-6;
+        }
+        return vol;
+      }
+
+      function volumeRM(t) {
+        const vol = -t * dQ + V0 - sampleVolume(t, TsMR, TsMD, vsMR, vsMD);
+        return safeVolume(vol, "V_M", t);
+      }
+
+      function volumeRF(t) {
+        const vol = t * dQ + V0 - sampleVolume(t, TsFR, TsFD, vsFR, vsFD);
+        return safeVolume(vol, "V_F", t);
+      }
+
+
+      function odefunc(t, y) {
+        const Qrm = Qm + dQ;
+        const Qrf = Qf - dQ;
+        const safe = (x, min = 1e-6) => Math.max(x, min);
+        const VRM = safe(volumeRM(t));
+        const VRF = safe(volumeRF(t));
+        return [
+          (Qm * y[2] - Qrm * y[0] - Dt * (y[0] - y[1]) + dQ * y[1]) / Vm,
+          (Qf * (y[3] - y[1]) + Dt * (y[0] - y[1])) / Vf,
+          Qrm * (y[0] - y[2]) / VRM,
+          Qrf * (y[1] - y[3]) / VRF
+        ];
+      }
+
+      function integrateODE_dopri(tspan, y0) {
+        const t0 = tspan[0];
+        const t1 = tspan[tspan.length - 1];
+
+        const solver = numeric.dopri(t0, t1, y0, odefunc, 1e-8, 10000, undefined, true);
+
+        const y_interp = [];
+        const vRM = [];
+        const vRF = [];
+
+        for (let i = 0; i < tspan.length; i++) {
+        const t = tspan[i];
+        y_interp.push(solver.at(t));
+        vRM.push(volumeRM(t));
+        vRF.push(volumeRF(t));
+    }
+
+  return { t: tspan, y: y_interp, VRM: vRM, VRF: vRF };
+}
+
+
+const { t, y, VRM, VRF } = integrateODE_dopri(tspan, y0);
+      const cm = y.map(row => row[0]);
+      const cf = y.map(row => row[1]);
+      const cM = y.map(row => row[2]);
+      const cF = y.map(row => row[3]);
+
+
+const layout = {
+  grid: { rows: 3, columns: 2, pattern: 'independent' },
+  title: 'Concentrations',
+  height: 1000,
+  xaxis: { title: 'Time (min)' },
+  yaxis: { title: 'Fetal drip concentration (mg/mL)', range: [0, null] },
+  xaxis2: { title: 'Time (min)' },
+  yaxis2: { title: 'Maternal drip concentration (mg/mL)', range: [0, null] },
+  xaxis3: { title: 'Time (min)' },
+  yaxis3: { title: 'Fetal resevoir concentration (mg/mL)', range: [0, null] },
+  xaxis4: { title: 'Time (min)' },
+  yaxis4: { title: 'Maternal reservoir concentration (mg/mL)', range: [0, null] },
+  xaxis5: { title: 'Time (min)' },
+  yaxis5: { title: 'Drip concentration ratio', range: [0, null] },
+  xaxis6: { title: 'Time (min)' },
+  yaxis6: { title: 'Reservoir concentration ratio', range: [0, null] }
+};
+
+
+      const traces = [
+        { x: t, y: cf, type: 'scatter', mode: 'lines+markers', name: 'closed system, c_f', xaxis: 'x1', yaxis: 'y1' },
+        { x: t, y: Array(t.length).fill(cfstar), type: 'scatter', mode: 'lines', name: 'open steady state system, c_f', xaxis: 'x1', yaxis: 'y1', line: { dash: 'dash' } },
+        { x: t, y: cm, type: 'scatter', mode: 'lines+markers', name: 'closed system c_m, ', xaxis: 'x2', yaxis: 'y2' },
+        { x: t, y: Array(t.length).fill(cmstar), type: 'scatter', mode: 'lines', name: 'open steady state system, c_m', xaxis: 'x2', yaxis: 'y2', line: { dash: 'dash' } },
+        { x: t, y: cF, type: 'scatter', mode: 'lines+markers', name: 'closed system, c_F', xaxis: 'x3', yaxis: 'y3' },
+        { x: t, y: cM, type: 'scatter', mode: 'lines+markers', name: 'closed system, c_M', xaxis: 'x4', yaxis: 'y4' },
+        { x: t, y: cf.map((v, i) => cm[i] !== 0 ? v / cm[i] : null), type: 'scatter', mode: 'lines+markers', name: 'closed system, c_f/c_m', xaxis: 'x5', yaxis: 'y5' },
+        { x: t, y: Array(t.length).fill(rstar), type: 'scatter', mode: 'lines', name: 'open steady state system, c_f/c_m', xaxis: 'x5', yaxis: 'y5', line: { dash: 'dash' } },
+        { x: t, y: cF.map((v, i) => cM[i] !== 0 ? v / cM[i] : null), type: 'scatter', mode: 'lines+markers', name: 'closed system, c_F/c_M', xaxis: 'x6', yaxis: 'y6' },
+      ];
+
+      
+    
+
+    Plotly.newPlot('plot', traces, layout);
+    }
+// Initialization logic
+window.onload = () => {
+    ['dQ', 'Dt'].forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('input', () => updateValue(id));
+      document.getElementById(id + '_val').textContent = el.value;
+    });
+
+    ['Qf', 'Qm', 'W', 'V0', 'C0', 'vsFR', 'vsFD', 'vsMR', 'vsMD', 'TsFR', 'TsFD', 'TsMR', 'TsMD'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updatePlot);
+    });
+
+    updatePlot();
+};
+  </script>
+</body>
+</html>
