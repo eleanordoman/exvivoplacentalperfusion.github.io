@@ -1,117 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Open Circuit - Chart.js</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .form-container {
-            display: flex;
-            justify-content: space-between;
-            gap: 2em;
-            flex-wrap: wrap;
-            max-width: 1000px;
-            margin-top: 1.5em;
-        }
+  <meta charset="UTF-8">
+  <title>Closed Circuit Simulation</title>
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
+  <style>
+    .form-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 2em;
+        flex-wrap: wrap;
+        max-width: 1000px;
+        margin-top: 1.5em;
+    }
 
-        .column {
-            flex: 1;
-            min-width: 300px;
-        }
+    .section-title {
+      font-weight: bold;
+      margin-bottom: 0.5em;
+      font-size: 1em;
+    }
 
-        body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-            background-color: #f9f9f9;
-        }
+    .column {
+        flex: 1;
+        min-width: 300px;
+    }
 
-        h1 {
-            text-align: center;
-            color: #333;
-        }
+    body {
+        font-family: Arial, sans-serif;
+        margin: 30px;
+        background-color: #f9f9f9;
+    }
 
-        .inputs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
+    h1 {
+        text-align: center;
+        color: #333;
+    }
 
-        .input-group {
-            display: inline-block;
-            flex-direction: column;
-            min-width: 200px;
-        }
+    .inputs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
 
-        label {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
+    .input-group {
+        display: inline-block;
+        flex-direction: column;
+        min-width: 200px;
+    }
 
-        .input-group label {
-            font-weight: 500;
-            margin-bottom: 0.3em;
-        }
+    label {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
 
-        .input-group input {
-            padding: 0.4em;
-        }
+    .input-group label {
+        font-weight: 500;
+        margin-bottom: 0.3em;
+    }
 
-        input,
-        select {
-            padding: 6px;
-            font-size: 14px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
+    .input-group input {
+        padding: 0.4em;
+    }
 
-        button {
-            display: block;
-            margin: 0 auto 20px auto;
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+    input,
+    select {
+        padding: 6px;
+        font-size: 14px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+    }
 
-        #d-value {
-            margin-top: 20px;
-            font-size: 18px;
-            font-weight: bold;
-            text-align: center;
-            color: #444;
-        }
+    button {
+        display: block;
+        margin: 0 auto 20px auto;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
 
-        .charts {
-            display: flex;
-            gap: 40px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
+    #d-value {
+        margin-top: 20px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        color: #444;
+    }
 
-        .chart-container {
-            width: 300px;
-        }
+    .charts {
+        display: flex;
+        gap: 40px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 
-        a {
-            display: block;
-            text-align: center;
-            margin-top: 30px;
-            text-decoration: none;
-            color: #007bff;
-        }
-    </style>
+    .chart-container {
+        width: 300px;
+    }
+
+    a {
+        display: block;
+        text-align: center;
+        margin-top: 30px;
+        text-decoration: none;
+        color: #007bff;
+    }
+</style>
 </head>
-
 <body>
-    <h1>Closed Circuit</h1>
-
-    <div style="margin-top: 1em; font-weight: bold;">Experimental parameters:</div>
+  <h1>Closed Circuit Simulation</h1>
+  <div style="margin-top: 1em; font-weight: bold;">Experimental parameters:</div>
 
     <div class="inputs">
         <div class="input-group">
@@ -136,7 +140,7 @@
         </div>
       </div>
 
-    </div></div>
+    </div>
         
     <div style="margin-top: 1em; font-weight: bold;">Experimental data input:</div>
 
@@ -193,15 +197,15 @@
           <div class="inputs">
             <div class="input-group">
               <label for="cFR">c<sub>F</sub>:</label>
-              <input id="cFR" value="0;0.2;0.3;0.3;0.3;0.4">
+              <input id="cFR" value="0, 0.2, 0.3, 0.3, 0.3, 0.4">
             </div>
             <div class="input-group">
               <label for="cMR">c <sub>M</sub>:</label>
-              <input id="cMR" value="1;0.7;0.5;0.4;0.4;0.4">
+              <input id="cMR" value="1, 0.7, 0.5, 0.4, 0.4, 0.4">
             </div>
             <div class="input-group">
                 <label for="cFD">c<sub>f</sub>:</label>
-              <input id="cFD" value="0;0.4;0.4;0.4;0.4;0.4">
+              <input id="cFD" value="0, 0.4, 0.4, 0.4, 0.4, 0.4">
             </div>
             <div class="input-group">
               <label for="cMD">c <sub>m</sub>:</label>
@@ -215,14 +219,6 @@
 
     <div class="inputs">
         
-        <div class="input-group">
-            <label>Select Parameter:</label>
-            <select id="parameterSelect">
-                <option value="Rconcentration_ratio">Reservoir concentration ratio</option>
-                <option value="mat_concentration">Maternal reservoir concentration</option>
-                <option value="fet_concentration">Fetal reservoir concentration</option>
-                <option value="Dconcentration_ratio">Fetal drip and maternal reservoir concentration ratio</option>
-            </select>
             <div class="input-group">
                 <label for="C0">C <sub>0</sub> (mg/mL):</label>
                 <input id="C0" value="1">
@@ -234,132 +230,197 @@
         </div>
     </div>
 
-    <button onclick="simulate()">Run Simulation</button>
+  <br><br>
+  <button id="simulateButton">Run Simulation</button>
 
-    <div id="plot" style="width:100%;height:500px;"></div>
-       
-</body>
+  <div id="plot" style="width: 100%; height: 500px;"></div>
 
-<script type="module">
-    import LM from "https://esm.sh/ml-levenberg-marquardt";
-
-    function dydt(t, y, Dt) {
-        const Qrm = Qm + dQ, Qrf = Qf - dQ;
-
-        const VRM = V0 - dQ * t - sampleVolume(t, T_SMR, T_SMD, v_SMR, v_SMD);
-        const VRF = V0 + dQ * t - sampleVolume(t, T_SFR, T_SFD, v_SFR, v_SFD);
-
-        const [cm, cf, cM, cF] = y;
-
-        return [
-            (Qm*cM - Qrm*cm - Dt*(cm - cf) + dQ*cf) / Vm,
-            (Qf*(cF - cf) + Dt*(cm - cf)) / Vf,
-            Qrm*(cm - cM) / VRM,
-            Qrf*(cf - cF) / VRF
-        ];
+<a href="index.html">Back to Home</a>
+    
+  <script>
+    function getArray(id) {
+      const val = document.getElementById(id).value.trim();
+      if (!val) return [];
+      return val
+      .split(',')
+      .map(s => parseFloat(s.trim()))
+      .filter(x => !isNaN(x));
     }
+    
 
-    function simulate() {
-        const Qm = parseFloat(document.getElementById('Qm').value);
-        const Qf = parseFloat(document.getElementById('Qf').value);
-        const dQ = parseFloat(document.getElementById('dQ').value);
-        const W = parseFloat(document.getElementById('W').value);
-        const V0 = parseFloat(document.getElementById('V0').value);
-        const vsFR = parseFloat(document.getElementById('vsFR').value);
-        const vsFD = parseFloat(document.getElementById('vsFD').value);
-        const vsMR = parseFloat(document.getElementById('vsMR').value);
-        const vsMD = parseFloat(document.getElementById('vsMD').value);
-        const TsFR = getArray('TsFR');
-        const TsFD = getArray('TsFD');
-        const TsMR = getArray('TsMR');
-        const TsMD = getArray('TsMD');
-        const cFR = getArray('cFR');
-        const cFD = getArray('cFD');
-        const cMR = getArray('cMR');
-        const cMD = getArray('cMD');
-        const model = document.getElementById('parameterSelect').value;
-        const C0 = parseFloat(document.getElementById('C0').value);
-        const D0 = parseFloat(document.getElementById('D0').value);
+function simulate() {
+  const getVal = id => parseFloat(document.getElementById(id).value) || 0;
+  const Qm = parseFloat(document.getElementById('Qm').value);
+  const Qf = parseFloat(document.getElementById('Qf').value);
+  const dQ = parseFloat(document.getElementById('dQ').value);
+  const W = parseFloat(document.getElementById('W').value);
+  const V0 = parseFloat(document.getElementById('V0').value);
+  const vsFR = parseFloat(document.getElementById('vsFR').value) || 0;
+  const vsFD = parseFloat(document.getElementById('vsFD').value) || 0;
+  const vsMR = parseFloat(document.getElementById('vsMR').value) || 0;
+  const vsMD = parseFloat(document.getElementById('vsMD').value) || 0;
+  const TsFR = getArray('TsFR');
+  const TsFD = getArray('TsFD');
+  const TsMR = getArray('TsMR');
+  const TsMD = getArray('TsMD');
+  const cFR = getArray('cFR');
+  const cFD = getArray('cFD');
+  const cMR = getArray('cMR');
+  const cMD = getArray('cMD');
+  const C0 = parseFloat(document.getElementById('C0').value);
+  const D0 = parseFloat(document.getElementById('D0').value);
 
-            document.getElementById('d-value').innerText = `D = ${D.toFixed(4)}, rNorm = ${rnorm.toFixed(4)}`;
+  // Calculate observed ratios where TsFR and TsMR have matching time points
 
-            plotChart('fetalChart', 'Fetal Concentration', ft, cf, cfstar);
-            plotChart('maternalChart', 'Maternal Concentration', mt, cm, cmstar);
-            plotChart('ratioChart', 'Fetal/Maternal Ratio', shared, ratioData, rstar);
-        }
+  
+  const obsTimes = TsFR.filter(t => TsMR.includes(t));
 
-    function sampleVolume(t, T_SR, T_SD, v_SR, v_SD) {
-        const nR = T_SR.filter(time => time <= t).length;
-        const nD = T_SD.filter(time => time <= t).length;
-        return v_SR * nR + v_SD * nD;
+  const obsRatios = obsTimes.map(t => {
+    const iFR = TsFR.findIndex(time => time === t);
+    const iMR = TsMR.findIndex(time => time === t);
+    const cf = cFR[iFR];
+    const cm = cMR[iMR];
+    return cm !== 0 ? cf / cm : 0;
+  });
+
+  if (!obsTimes || obsTimes.length === 0) {
+    console.warn("No overlapping observation times found.");
+    return;
+  }
+
+  const Vm = W * 0.34;
+  const Vf = W * 0.074;
+
+  const sampleVolume = (t, T_SR, T_SD, v_SR, v_SD) => {
+    const nR = (T_SR || []).filter(time => time <= t).length;
+    const nD = (T_SD || []).filter(time => time <= t).length;
+    return (v_SR || 0) * nR + (v_SD || 0) * nD;
+  }
+
+  function safeVolume(vol, label, t) {
+    if (vol <= 0) {
+      const msg = `${label} volume became non-positive at t=${t.toFixed(2)}: ${vol.toFixed(4)} mL`;
+      console.warn(msg);
+      return 1e-6;
     }
+    return vol;
+  }
+  
+  function volumeRM(t) {
+    const vol = -t * dQ + V0 - sampleVolume(t, TsMR, TsMD, vsMR, vsMD);
+    return safeVolume(vol, "V_M", t);
+  }
 
-    function rk4(f, y0, t0, tEnd, dt, Dt) {
-      let t = t0, y = y0.slice(), T = [], Y = [];
-      while (t <= tEnd) {
-        T.push(t);
-        Y.push(y.slice());
-        let k1 = f(t, y, Dt);
-        let k2 = f(t + dt/2, y.map((yi, i) => yi + dt*k1[i]/2), Dt);
-        let k3 = f(t + dt/2, y.map((yi, i) => yi + dt*k2[i]/2), Dt);
-        let k4 = f(t + dt, y.map((yi, i) => yi + dt*k3[i]), Dt);
-        y = y.map((yi, i) => yi + dt / 6 * (k1[i] + 2*k2[i] + 2*k3[i] + k4[i]));
-        t += dt;
-      }
-      return { T, Y };
+  function volumeRF(t) {
+    const vol = t * dQ + V0 - sampleVolume(t, TsFR, TsFD, vsFR, vsFD);
+    return safeVolume(vol, "V_F", t);
+  }
+
+  const tspan = Array.from(new Set([...TsFR, ...TsMR])).sort((a, b) => a - b);
+  const y0 = [0, 0, C0, 0]; // Initial guess for concentrations
+
+  function simulateModel(Dt) {
+    function odefunc(t, y) {
+      const Qrm = Qm + dQ;
+      const Qrf = Qf - dQ;
+      const safe = (x, min = 1e-6) => Math.max(x, min);
+      const VRM = safe(volumeRM(t));
+      const VRF = safe(volumeRF(t));
+      return [
+        (Qm * y[2] - Qrm * y[0] - Dt * (y[0] - y[1]) + dQ * y[1]) / Vm,
+        (Qf * (y[3] - y[1]) + Dt * (y[0] - y[1])) / Vf,
+        Qrm * (y[0] - y[2]) / VRM,
+        Qrf * (y[1] - y[3]) / VRF
+      ];
     }
-
-    function modelGenerator(tspan, dt) {
-      return function([Dt]) {
-        const result = rk4(dydt, [0, 0, C0, 0], 0, Math.max(...tspan), dt, Dt);
-        const modelMap = new Map(result.T.map((t, i) => [Math.round(t), result.Y[i]]));
-        return tspan.map(t => {
-          const y = modelMap.get(Math.round(t));
-          return y ? y[3] / y[2] : 0;
-        });
-      };
-    }
-
-    // Fit using Levenberg-Marquardt
-    const options = {
-      damping: 1.5,
-      initialValues: [0.5], // Initial guess for Dt
-      gradientDifference: 1e-2,
-      maxIterations: 100,
-      errorTolerance: 1e-3,
-    };
-
-    const fit = LM({
-      x: T_data,
-      y: obs_ratios,
-      model: modelGenerator(T_data, 5),
-    }, options);
-
-    console.log("Fitted Dt:", fit.parameterValues[0]);
-
-    // Plot
-    const model_ratios = modelGenerator(T_data, 5)(fit.parameterValues);
-
-    Plotly.newPlot('plot', [
-      {
-        x: T_data,
-        y: obs_ratios,
-        mode: 'markers',
-        name: 'Observed cF/cM',
-        marker: { color: 'red', symbol: 'x' }
-      },
-      {
-        x: T_data,
-        y: model_ratios,
-        mode: 'lines+markers',
-        name: 'Fitted Model',
-        line: { color: 'black' }
-      }
-    ], {
-      title: 'Fitted Diffusivity Dt using Levenberg-Marquardt',
-      xaxis: { title: 'Time (min)' },
-      yaxis: { title: 'cF / cM' }
+    const solver = numeric.dopri(tspan[0], tspan[tspan.length - 1], y0, odefunc, 1e-8, 10000, undefined, true);
+    return obsTimes.map(t => {
+      const y = solver.at(t);
+      return y[2] !== 0 ? y[3] / y[2] : 0;
     });
+  }
+
+  function cost(Dt) {
+    const sim = simulateModel(Dt);
+    return numeric.norm2Squared(numeric.sub(obsRatios, sim));
+  }
+
+  // Gradient descent to minimize cost(Dt)
+  let Dt = D0;
+  let learningRate = 0.01;
+  let maxIter = 1000;
+  let tolerance = 1e-6;
+
+  function gradient(f, x, h = 1e-5) {
+    return (f(x + h) - f(x - h)) / (2 * h);
+  }
+
+  for (let i = 0; i < maxIter; i++) {
+    let grad = gradient(cost, Dt);
+    let nextDt = Dt - learningRate * grad;
+
+    if (!isFinite(nextDt)) break;
+    if (Math.abs(nextDt - Dt) < tolerance) break;
+
+    Dt = nextDt;
+  }
+
+  const bestDt = Dt;
+
+  function odefuncDt(t, y) {
+    const Qrm = Qm + dQ;
+    const Qrf = Qf - dQ;
+    const safe = (x, min = 1e-6) => Math.max(x, min);
+    const VRM = safe(volumeRM(t));
+    const VRF = safe(volumeRF(t));
+    return [
+      (Qm * y[2] - Qrm * y[0] - bestDt * (y[0] - y[1]) + dQ * y[1]) / Vm,
+      (Qf * (y[3] - y[1]) + bestDt * (y[0] - y[1])) / Vf,
+      Qrm * (y[0] - y[2]) / VRM,
+      Qrf * (y[1] - y[3]) / VRF
+    ];
+  }
+
+  const fullSolution = numeric.dopri(tspan[0], tspan[tspan.length - 1], y0, odefuncDt, 1e-8, 10000, undefined, true); 
+  const modelTimes = tspan;
+  const modelRatios = tspan.map(t => {const y = fullSolution.at(t); return y[2] > 0 ? y[3] / y[2] : 0;});
+
+  function computeRSquared(observed, predicted) {
+    const meanObs = numeric.sum(observed) / observed.length;
+    const ssTot = numeric.sum(observed.map(y => Math.pow(y - meanObs, 2)));
+    const ssRes = numeric.sum(observed.map((y, i) => Math.pow(y - predicted[i], 2)));
+    return 1 - ssRes / ssTot;
+  }
+
+const rSquared = computeRSquared(obsRatios, simulateModel(bestDt));
+
+  Plotly.newPlot('plot', [
+    {
+      x: obsTimes,
+      y: obsRatios,
+      mode: 'markers',
+      name: 'Observed cF / cM',
+      marker: { color: 'red', symbol: 'x' }
+    },
+    {
+      x: modelTimes,
+      y: modelRatios,
+      mode: 'lines+markers',
+      name: 'Fitted Model',
+      line: { color: 'black' }
+    }
+  ], {
+    title: `Fitted Dt = ${bestDt.toFixed(4)}, R² = ${rSquared.toFixed(4)}`,
+    xaxis: { title: 'Time (min)' },
+    yaxis: { title: 'cF / cM' }
+  });
+}
+
+window.onload = function () {
+  document.getElementById('simulateButton').addEventListener('click', simulate);
+};
+
 </script>
 
+</body>
 </html>
